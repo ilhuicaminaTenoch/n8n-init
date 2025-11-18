@@ -1,0 +1,2 @@
+CREATE DATABASE cotizaciones_db;
+CREATE DATABASE n8n_db;

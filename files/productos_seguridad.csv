@@ -1,0 +1,13 @@
+sku,product_name,category,size,color,stock,price_rd
+CC001,"Cámara Domo 2MP IR 30m",CCTV,2MP,White,25,4500
+CC002,"Cámara Bullet 4MP Varifocal",CCTV,4MP,White,15,7200
+CC003,"Grabador NVR 8 Canales PoE",CCTV,8ch,Black,8,15400
+CC004,"Cámara PTZ 25x Zoom Óptico",CCTV,25x,White,5,28500
+AC001,"Controladora 2 Puertas TCP/IP",CONTROL_ACCESO,2-door,Blue,10,9800
+AC002,"Lector de Proximidad RFID",CONTROL_ACCESO,Standalone,Black,40,2100
+AC003,"Cerradura Magnética 600 lbs",CONTROL_ACCESO,600lbs,Silver,20,3600
+AC004,"Botón de Salida Inoxidable",CONTROL_ACCESO,Flush,Silver,35,890
+FI001,"Panel Contra Incendio 8 Zonas",DETECCION_INCENDIO,8 zonas,Red,5,18900
+FI002,"Detector de Humo Fotoeléctrico",DETECCION_INCENDIO,Convenc.,White,60,980
+FI003,"Estación Manual Rompible",DETECCION_INCENDIO,Convenc.,Red,30,1450
+FI004,"Sirena Estroboscópica Interior",DETECCION_INCENDIO,24VDC,Red,35,2100
