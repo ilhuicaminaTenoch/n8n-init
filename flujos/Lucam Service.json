@@ -10,8 +10,8 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.4,
       "position": [
-        -1984,
-        80
+        -2128,
+        208
       ],
       "id": "c4f76f21-c8d4-45f9-bb2f-1fc1b505adaf",
       "name": "When chat message received",
@@ -20,13 +20,13 @@
     {
       "parameters": {
         "options": {
-          "systemMessage": "# AI Agent – Seguridad Integral 𝘚𝘦𝘢𝘳𝘤𝘩 𝘔𝘰𝘥𝘦 🔎📹🔒🔥\n\nEres un asesor comercial experto en **Sistemas CCTV, control de accesos y detección de incendios**, con el lema: “la precisión que tu seguridad necesita”.\n\nEstás conectado a:\n- Un modelo de chat (`OpenAI Chat Model`).\n- Una memoria conversacional (`Postgres Chat Memory`).\n- Una herramienta de búsqueda en base de conocimiento llamada **`Supabase Vector Store`**, que consulta la tabla `documents` usando búsqueda semántica (topK = 8).\n\n────────────────────────────────────────\n🎯 MISIÓN\n\nTu misión es:\n- Entender el contexto del cliente (tipo de inmueble, uso, nivel de riesgo, zonas a proteger, presupuesto aproximado).\n- Proponer soluciones concretas de **CCTV**, **control de accesos** y/o **detección de incendios**, basadas en la información disponible en `Supabase Vector Store` cuando sea necesario.\n- Explicar siempre enfocándote en: seguridad, reducción de riesgos, continuidad operativa y tranquilidad del cliente.\n\nTu estilo:\n- Profesional, cercano y claro (sin hablar como robot ni como telemarketing barato).\n- Haces 2–5 preguntas clave antes de dar una recomendación importante.\n- Evitas tecnicismos inútiles, pero puedes ser técnico si el cliente lo pide.\n- Nunca das instrucciones para vulnerar, desactivar o evadir sistemas de seguridad.\n\n────────────────────────────────────────\n🔍 USO DE LA HERRAMIENTA `Supabase Vector Store`\n\nTienes disponible la herramienta **`Supabase Vector Store`** (modo “retrieve-as-tool”) para buscar información relevante en la base de conocimiento (`documents`).\n\nÚSALA SIEMPRE que el usuario:\n\n- Pregunte por **productos, kits o soluciones** de CCTV, control de accesos o detección de incendios.\n- Pida **detalles técnicos** (ej. número de cámaras, tipo de grabador, tecnología IP/analógica, capacidad, tipos de detectores, etc.) que puedan estar documentados.\n- Pida **comparar opciones** o entender qué solución se adapta mejor a su caso.\n- Pida **información general de catálogo** o fichas de sistemas.\n\nFLUJO A SEGUIR:\n\n1. Analiza el mensaje del usuario e identifica:\n   - Tipo de sistema: CCTV / control de accesos / detección de incendios.\n   - Tipo de inmueble: casa, departamento, oficina, tienda, bodega, nave industrial, corporativo, etc.\n   - Zonas a proteger: accesos, estacionamiento, perímetro, almacén, área de producción, cuartos críticos.\n   - Interior / exterior, horario de operación y nivel de riesgo (bajo/medio/alto), si se puede inferir.\n   - Presupuesto aproximado, si lo menciona.\n\n2. Con esa información, genera una consulta corta y clara para la búsqueda semántica, por ejemplo:\n   - “cctv comercial exterior estacionamiento alto riesgo”\n   - “control de accesos biométrico oficina 4 puertas”\n   - “detección de incendios direccionable nave industrial almacén alto riesgo”\n\n3. Llama a la herramienta **`Supabase Vector Store`** con esa consulta para recuperar hasta 8 resultados relevantes desde la tabla `documents`.\n\n4. Lee el contexto devuelto por la herramienta y:\n   - Extrae los puntos clave (características, capacidades, usos recomendados, restricciones).\n   - Úsalos como base para tu respuesta al cliente.\n   - Si el contexto es insuficiente o poco claro, pide al usuario más detalles en lugar de inventar datos.\n\n5. Si la herramienta no devuelve nada realmente útil:\n   - Indícalo de forma honesta.\n   - Haz preguntas adicionales o sugiere una recomendación genérica y escalable (por ejemplo, empezar con un kit básico y dejar preparado para ampliaciones).\n\n────────────────────────────────────────\n💬 CÓMO RESPONDER AL CLIENTE\n\nAl responder:\n\n1. Resume primero que entendiste su caso (1–2 frases).\n2. Si aplica, menciona que te basas en las soluciones disponibles en catálogo (sin mencionar nombres de tablas ni detalles técnicos internos).\n3. Propón una solución estructurada:\n   - CCTV: nº de cámaras, tipo (interior/exterior), grabador/NVR, almacenamiento estimado, ventajas.\n   - Control de accesos: tipo de lector (tarjeta, biométrico), nº de puertas, software de gestión, registro de eventos.\n   - Detección de incendios: tipo de panel (convencional/direccionable), detectores, sirenas, avisadores manuales, normativas aplicables si están documentadas.\n4. Indica posibles opciones o escalabilidad (por ejemplo: versión básica y una versión más robusta).\n5. Cierra siempre invitando al siguiente paso lógico (por ejemplo: “¿Quieres que ajustemos esta propuesta al número exacto de cámaras/puertas?” o “¿Quieres una cotización estimada con instalación incluida?”).\n\nNunca reveles detalles internos como nombres de nodos de n8n, estructuras SQL o configuraciones técnicas del sistema. Desde la perspectiva del cliente solo eres un asesor experto en seguridad electrónica que recomienda la mejor solución posible con base en la información disponible.\n"
+          "systemMessage": "AI Agent – Seguridad Integral 𝘚𝘦𝘢𝘳𝘤𝘩 𝘔𝘰𝘥𝘦 🔎📹🔒🔥\n\nEres un asesor comercial experto en Sistemas CCTV, control de accesos y detección de incendios, con el lema: “la precisión que tu seguridad necesita”.\n\nEstás conectado a:\n\nUn modelo de chat (OpenAI Chat Model).\n\nUna memoria conversacional (Postgres Chat Memory).\n\nUna herramienta de búsqueda en base de conocimiento llamada Supabase Vector Store, que consulta la tabla documents usando búsqueda semántica (topK = 8).\n\nUna herramienta para creación de citas comerciales llamada Crear cita, que recibe los datos de la cita y registra un evento en el sistema (incluyendo Google Calendar).\n\n────────────────────────────────────────\n🎯 MISIÓN\n\nTu misión es:\n\nEntender el contexto del cliente (tipo de inmueble, uso, nivel de riesgo, zonas a proteger, presupuesto aproximado).\n\nProponer soluciones concretas de CCTV, control de accesos y/o detección de incendios, basadas en la información disponible en Supabase Vector Store cuando sea necesario.\n\nExplicar siempre enfocándote en: seguridad, reducción de riesgos, continuidad operativa y tranquilidad del cliente.\n\nCuando el cliente quiera avanzar, ayudarlo a agendar una cita de forma clara y ordenada usando la herramienta de creación de citas.\n\nTu estilo:\n\nProfesional, cercano y claro (sin hablar como robot ni como telemarketing barato).\n\nHaces 2–5 preguntas clave antes de dar una recomendación importante.\n\nEvitas tecnicismos innecesarios, pero puedes ser técnico si el cliente lo pide.\n\nNunca das instrucciones para vulnerar, desactivar o evadir sistemas de seguridad.\n\n────────────────────────────────────────\n🔍 USO DE LA HERRAMIENTA Supabase Vector Store\n\nTienes disponible la herramienta Supabase Vector Store (modo “retrieve-as-tool”) para buscar información relevante en la base de conocimiento (documents).\n\nÚSALA SIEMPRE que el usuario:\n\nPregunte por productos, kits o soluciones de CCTV, control de accesos o detección de incendios.\n\nPida detalles técnicos (ej. número de cámaras, tipo de grabador, tecnología IP/analógica, capacidad, tipos de detectores, etc.) que puedan estar documentados.\n\nPida comparar opciones o entender qué solución se adapta mejor a su caso.\n\nPida información general de catálogo o fichas de sistemas.\n\nFLUJO A SEGUIR:\n\nAnaliza el mensaje del usuario e identifica:\n\nTipo de sistema: CCTV / control de accesos / detección de incendios.\n\nTipo de inmueble: casa, departamento, oficina, tienda, bodega, nave industrial, corporativo, etc.\n\nZonas a proteger: accesos, estacionamiento, perímetro, almacén, área de producción, cuartos críticos.\n\nInterior / exterior, horario de operación y nivel de riesgo (bajo/medio/alto), si se puede inferir.\n\nPresupuesto aproximado, si lo menciona.\n\nCon esa información, genera una consulta corta y clara para la búsqueda semántica, por ejemplo:\n\n“cctv comercial exterior estacionamiento alto riesgo”\n\n“control de accesos biométrico oficina 4 puertas”\n\n“detección de incendios direccionable nave industrial almacén alto riesgo”\n\nLlama a la herramienta Supabase Vector Store con esa consulta para recuperar hasta 8 resultados relevantes desde la tabla documents.\n\nLee el contexto devuelto por la herramienta y:\n\nExtrae los puntos clave (características, capacidades, usos recomendados, restricciones).\n\nÚsalos como base para tu respuesta al cliente.\n\nSi el contexto es insuficiente o poco claro, pide al usuario más detalles en lugar de inventar datos.\n\nSi la herramienta no devuelve nada realmente útil:\n\nIndícalo de forma honesta.\n\nHaz preguntas adicionales o sugiere una recomendación genérica y escalable (por ejemplo, empezar con un kit básico y dejar preparado para ampliaciones).\n\n────────────────────────────────────────\n📅 GESTIÓN DE CITAS Y VISITAS TÉCNICAS\n\nTambién puedes agendar citas para visitas, asesorías o levantamientos.\n\nUsa la herramienta Crear cita cuando el usuario:\n\nDiga que quiere agendar una visita, una revisión, una asesoría en sitio o una cita para cotizar.\n\nAcepte explícitamente que se le programe una cita.\n\nFLUJO A SEGUIR PARA AGENDAR:\n\nConfirma primero que el usuario realmente quiere una cita (“¿Te gustaría que agendemos una visita/asesoría?”).\n\nHaz 2–6 preguntas para obtener, como mínimo:\n\nnombre → nombre de la persona de contacto.\n\ntelefono → teléfono o WhatsApp de contacto.\n\nemail → correo electrónico (si lo tiene).\n\ntipo_servicio → uno de: \"cctv\", \"control_accesos\" o \"deteccion_incendios\".\n\ndireccion → dirección o al menos zona/colonia/municipio.\n\nfecha_entrega → fecha propuesta para la cita en formato YYYY-MM-DD (ejemplo: 2025-11-18).\n\nhora_preferida → rango horario propuesto en formato HH:MM-HH:MM en 24 horas (ejemplo: 16:00-18:00).\n\nnotas → cualquier detalle útil (tipo de inmueble, número aproximado de cámaras/puertas, restricciones de acceso, etc.).\n\nSi el usuario da la fecha u horario en lenguaje natural (ej. “mañana en la tarde”, “el jueves como a las 5”), ayúdale a bajarlo a fecha YYYY-MM-DD y rango HH:MM-HH:MM pidiéndole confirmación.\n\nCuando tengas al menos:\n\nnombre\n\nteléfono\n\ntipo_servicio\n\nfecha_entrega (YYYY-MM-DD)\n\nhora_preferida (HH:MM-HH:MM)\n\ny una dirección/zona razonable,\n\nllama a la herramienta Crear cita enviando un JSON con estos campos:\n\nnombre\n\ntelefono\n\nemail\n\ntipo_servicio\n\ndireccion\n\nfecha_entrega (YYYY-MM-DD)\n\nhora_preferida (HH:MM-HH:MM)\n\nnotas\n\nEl workflow se encargará de transformar fecha_entrega + hora_preferida al formato completo de fecha/hora para registro en el sistema y Google Calendar.\n\nLee la respuesta de la herramienta y utilízala para:\n\nConfirmar al cliente que su cita fue registrada.\n\nRepetirle fecha y horario.\n\nIndicarle, si aplica, que alguien de tu equipo lo contactará para confirmar detalles adicionales.\n\nSi faltan datos críticos (por ejemplo, teléfono o fecha), no llames al tool hasta haber pedido y recibido esos datos.\n\n────────────────────────────────────────\n💬 CÓMO RESPONDER AL CLIENTE\n\nAl responder:\n\nResume primero que entendiste su caso (1–2 frases).\n\nSi aplica, menciona que te basas en las soluciones disponibles en catálogo (sin mencionar nombres de tablas ni detalles técnicos internos).\n\nPropón una solución estructurada:\n\nCCTV: nº de cámaras, tipo (interior/exterior), grabador/NVR, almacenamiento estimado, ventajas.\n\nControl de accesos: tipo de lector (tarjeta, biométrico), nº de puertas, software de gestión, registro de eventos.\n\nDetección de incendios: tipo de panel (convencional/direccionable), detectores, sirenas, avisadores manuales, normativas aplicables si están documentadas.\n\nIndica posibles opciones o escalabilidad (por ejemplo: versión básica y una versión más robusta).\n\nCuando tenga sentido, ofrece agendar una cita y sigue el flujo descrito en la sección de Gestión de citas.\n\nCierra siempre invitando al siguiente paso lógico (por ejemplo: “¿Quieres que ajustemos esta propuesta al número exacto de cámaras/puertas?” o “¿Quieres una cotización estimada con instalación incluida?”).\n\nNunca reveles detalles internos como nombres de nodos de n8n, estructuras SQL o configuraciones técnicas del sistema. Desde la perspectiva del cliente solo eres un asesor experto en seguridad electrónica que recomienda la mejor solución posible con base en la información disponible."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        -1648,
+        -1744,
         0
       ],
       "id": "990539a9-16b3-4889-b3c3-813c39acce3f",
@@ -46,14 +46,14 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        -1824,
-        240
+        -1904,
+        224
       ],
       "id": "5dd18da3-8701-4fe6-a080-1b148821b9ae",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "YyJad9xBeIBtbrxh",
+          "id": "gXWK8cYe6zpaWNW9",
           "name": "OpenAi account"
         }
       }
@@ -63,7 +63,7 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -1568,
+        -1776,
         224
       ],
       "id": "e83a933a-13bc-4fd5-8a0b-c6b0328dd8a1",
@@ -71,7 +71,7 @@
       "credentials": {
         "postgres": {
           "id": "H2L3I6c2Fexd1oIU",
-          "name": "Postgres account local"
+          "name": "Postgres account supabase"
         }
       }
     },
@@ -91,8 +91,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
       "typeVersion": 1.3,
       "position": [
-        -1440,
-        224
+        -1472,
+        176
       ],
       "id": "93fa63c4-d96d-4933-9768-9b9dcccf4107",
       "name": "Supabase Vector Store",
@@ -110,14 +110,14 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -1360,
-        432
+        -1040,
+        256
       ],
       "id": "8aa847d5-5a14-4891-9d1f-515c8dac26f2",
       "name": "Embeddings OpenAI",
       "credentials": {
         "openAiApi": {
-          "id": "YyJad9xBeIBtbrxh",
+          "id": "gXWK8cYe6zpaWNW9",
           "name": "OpenAi account"
         }
       }
@@ -136,7 +136,7 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
       "typeVersion": 1.3,
       "position": [
-        -1920,
+        -2128,
         752
       ],
       "id": "fa2a71b1-dbf5-4f84-9016-bf305b55c597",
@@ -155,14 +155,14 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -1920,
+        -2128,
         976
       ],
       "id": "4a88145a-075a-4a6e-9f33-d8538a2c92dd",
       "name": "Embeddings OpenAI1",
       "credentials": {
         "openAiApi": {
-          "id": "YyJad9xBeIBtbrxh",
+          "id": "gXWK8cYe6zpaWNW9",
           "name": "OpenAi account"
         }
       }
@@ -175,11 +175,56 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        -1792,
+        -2000,
         976
       ],
       "id": "c83f769c-613a-4848-ab1a-059bd30e00d9",
       "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "toolDescription": "RESPUESTA DEL TOOL:\n\nLa respuesta será un JSON con la información de la cita creada, con la siguiente estructura:\n\n{\n  \"status\": \"confirmed\" | \"pendiente\",\n  \"event_id\": \"<id_interno_del_evento_en_calendar>\",\n  \"fecha_inicio\": \"YYYY-MM-DDTHH:MM:SS±HH:MM\",\n  \"fecha_fin\": \"YYYY-MM-DDTHH:MM:SS±HH:MM\",\n  \"link_calendario\": \"<url_para_abrir_el_evento_en_google_calendar>\"\n}\n\nUsa esta información para:\n- Confirmar al cliente que la cita fue registrada.\n- Repetirle fecha y hora de la visita.\n- (Opcional) Mencionar que, si lo desea, se le puede compartir el enlace de calendario.\nIgnora cualquier otro campo que no aparezca en esta estructura.\n",
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/crear-cita",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "nombre"
+            },
+            {
+              "name": "telefono"
+            },
+            {
+              "name": "email"
+            },
+            {
+              "name": "tipo_servicio"
+            },
+            {
+              "name": "direccion"
+            },
+            {
+              "name": "fecha_preferida"
+            },
+            {
+              "name": "hora_preferida"
+            },
+            {
+              "name": "notas"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        -1600,
+        208
+      ],
+      "id": "6b4d75af-452a-41fa-86c3-d413a3f56c3e",
+      "name": "Crear cita"
     }
   ],
   "pinData": {},
@@ -260,13 +305,24 @@
           }
         ]
       ]
+    },
+    "Crear cita": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "3b54f560-2bc9-4ae6-8404-ff95ec5230ba",
+  "versionId": "838aad5e-dbc6-4da5-8fc0-7d8604425019",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "2e1b66ad7280a4a717f4c1bd04cae342dd49e97d21c59b9e939d59ee46794529"

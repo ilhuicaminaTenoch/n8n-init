@@ -42,16 +42,17 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "nombre_cliente": "={{ $json.nombre_cliente }}",
-            "telefono": "={{ $json.telefono }}",
-            "email": "={{ $json.email }}",
-            "tipo_servicio": "={{ $json.tipo_servicio }}",
-            "direccion": "={{ $json.direccion }}",
-            "fecha_entrega": "={{ $json.fecha_preferida }}",
+            "nombre_cliente": "={{ $json.body.nombre }}",
+            "telefono": "={{ $json.body.telefono }}",
+            "email": "={{ $json.body.email }}",
+            "tipo_servicio": "={{ $json.body.tipo_servicio }}",
+            "direccion": "={{ $json.body.direccion }}",
+            "fecha_entrega": "={{ $json.body.fecha_preferida }}",
             "hora_inicio": "={{ $json.hora_inicio }}",
             "hora_fin": "={{ $json.hora_fin }}",
-            "estado": "={{ $json.estado }}",
-            "id": 0
+            "estado": "=",
+            "created_at": "2025-11-19T12:17:40",
+            "notas": "={{ $json.body.notas }}"
           },
           "matchingColumns": [
             "id"
@@ -182,34 +183,7 @@
       "credentials": {
         "postgres": {
           "id": "H2L3I6c2Fexd1oIU",
-          "name": "Postgres account local"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "calendar": {
-          "__rl": true,
-          "value": "26511fe382958416668b7d02b1e0c4906a89ff2317546d62eec3f4e4a6a8c70a@group.calendar.google.com",
-          "mode": "list",
-          "cachedResultName": "n8n test"
-        },
-        "start": "={{ $('Contruir DateTime').item.json.startDateTime }}",
-        "end": "={{ $('Contruir DateTime').item.json.endDateTime }}",
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.googleCalendar",
-      "typeVersion": 1.3,
-      "position": [
-        272,
-        144
-      ],
-      "id": "7aed988c-87b7-489c-977c-6652f3ea769e",
-      "name": "Create an event",
-      "credentials": {
-        "googleCalendarOAuth2Api": {
-          "id": "e3TwvjNW0L6Wiwx2",
-          "name": "Google Calendar account"
+          "name": "Postgres account supabase"
         }
       }
     },
@@ -225,6 +199,83 @@
       ],
       "id": "ce4c52bb-1618-4cdd-af8d-b0546e9c1811",
       "name": "Contruir DateTime"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "26511fe382958416668b7d02b1e0c4906a89ff2317546d62eec3f4e4a6a8c70a@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "n8n test"
+        },
+        "start": "={{ $('Contruir DateTime').item.json.startDateTime }}",
+        "end": "={{ $('Contruir DateTime').item.json.endDateTime }}",
+        "additionalFields": {
+          "description": "={{ $json.nombre_cliente }} ",
+          "summary": "=Vísita técnica  {{ $json.tipo_servicio }} - {{ $json.nombre_cliente }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        144
+      ],
+      "id": "7aed988c-87b7-489c-977c-6652f3ea769e",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "5zPpquft6uWA9VEy",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "06172830-8655-4741-aa76-261715a07be7",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "49130130-55b3-4c80-b50a-286d10b3e43d",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "ad25366e-b338-443e-a05f-d71b57f77dde",
+              "name": "fecha_inicio",
+              "value": "={{ $json.start.dateTime }}",
+              "type": "string"
+            },
+            {
+              "id": "33afcd98-c66b-4fdc-b0e3-a7951eb511d5",
+              "name": "fecha_fin",
+              "value": "={{ $json.end.dateTime }}",
+              "type": "string"
+            },
+            {
+              "id": "224b5674-f351-4909-a1f0-b9593c313859",
+              "name": "link_calendario",
+              "value": "={{ $json.htmlLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        144
+      ],
+      "id": "b673588b-bd8c-42e7-895a-15609bf519b6",
+      "name": "Formatear Respuesta"
     }
   ],
   "pinData": {},
@@ -261,13 +312,24 @@
           }
         ]
       ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Formatear Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "471d7f3c-6bf2-458c-b148-7ba9504140ed",
+  "versionId": "f5c6c12b-ca38-4690-8fb8-d288b40ec3dc",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "2e1b66ad7280a4a717f4c1bd04cae342dd49e97d21c59b9e939d59ee46794529"
