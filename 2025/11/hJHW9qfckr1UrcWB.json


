@@ -1,0 +1,192 @@
+{
+  "active": false,
+  "connections": {
+    "Webhook Email Tecnico": {
+      "main": [
+        [
+          {
+            "node": "Preparar Email Tecnico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Email Tecnico": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email al Tecnico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Email al Tecnico": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Exitosa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-11-27T16:44:16.134Z",
+  "id": "hJHW9qfckr1UrcWB",
+  "isArchived": false,
+  "meta": null,
+  "name": "Email Tecnico con Cotizacion",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/email-tecnico-cotizacion",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c4f2f298-a63d-4c7e-a745-abd4918a0384",
+      "name": "Webhook Email Tecnico",
+      "webhookId": "email-tecnico-cotizacion-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Preparar y generar el HTML completo del email\nconst body = $input.first().json.body\n\nconsole.log('📧 Preparando email para técnico...');\n\n// Validar datos mínimos\nconst datosRequeridos = [\n  'cita_id',\n  'nombre_cliente', \n  'telefono',\n  'tipo_servicio',\n  'direccion',\n  'fecha_entrega',\n  'hora_inicio',\n  'hora_fin'\n];\n\nconst faltantes = datosRequeridos.filter(campo => !body[campo]);\nif (faltantes.length > 0) {\n  throw new Error(`Faltan datos requeridos: ${faltantes.join(', ')}`);\n}\n\n// Preparar datos de cotización\nconst tieneCotizacion = body.cotizacion_texto && body.cotizacion_texto.length > 0;\n\n// Función para generar la tabla de productos en HTML\nfunction generarTablaProductos(productos) {\n  if (!productos || productos.length === 0) {\n    return '<p>No se detectaron productos específicos en la cotización.</p>';\n  }\n\n  let tablaHTML = `\n    <table class=\"productos-table\">\n      <thead>\n        <tr>\n          <th>Producto</th>\n          <th style=\"text-align: center;\">Cantidad</th>\n          <th style=\"text-align: right;\">Precio Unitario</th>\n          <th style=\"text-align: right;\">Subtotal</th>\n        </tr>\n      </thead>\n      <tbody>\n  `;\n\n  productos.forEach(producto => {\n    tablaHTML += `\n        <tr>\n          <td>${producto.nombre_producto || producto.nombre}</td>\n          <td style=\"text-align: center;\">${producto.cantidad}</td>\n          <td style=\"text-align: right;\">$${producto.precio_unitario} MXN</td>\n          <td style=\"text-align: right;\">$${producto.subtotal} MXN</td>\n        </tr>\n    `;\n  });\n\n  tablaHTML += `\n        <tr class=\"total-row\">\n          <td colspan=\"3\" style=\"text-align: right; padding-right: 12px;\"><strong>Total Equipos:</strong></td>\n          <td style=\"text-align: right;\"><strong>$${body.total_equipos || productos.reduce((sum, prod) => sum + (prod.subtotal || 0), 0)} MXN</strong></td>\n        </tr>\n      </tbody>\n    </table>\n  `;\n\n  return tablaHTML;\n}\n\n// Generar el HTML completo del email\nconst htmlContent = `\n<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Nueva Cita Técnica</title>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f6f6f6; padding: 20px; }\n        .email-container { max-width: 700px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }\n        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; text-align: center; }\n        .logo { font-size: 24px; font-weight: bold; margin-bottom: 5px; }\n        .tagline { font-size: 14px; opacity: 0.9; }\n        .content { padding: 30px; }\n        .section { background: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #667eea; }\n        .cotizacion-section { background: #fff3cd; border-left: 4px solid #ffc107; }\n        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }\n        .detail-item { margin-bottom: 10px; }\n        .detail-label { font-weight: 600; color: #4a5568; font-size: 14px; margin-bottom: 2px; }\n        .detail-value { color: #2d3748; font-size: 16px; }\n        .productos-table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; border-radius: 8px; overflow: hidden; }\n        .productos-table th { background: #667eea; color: white; padding: 12px; text-align: left; }\n        .productos-table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }\n        .productos-table tr:last-child td { border-bottom: none; }\n        .total-row { background: #f7fafc; font-weight: bold; }\n        .footer { background: #2d3748; color: #cbd5e0; padding: 20px; text-align: center; font-size: 12px; }\n        .button { display: inline-block; background: #667eea; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 10px 5px; }\n        .whatsapp-button { background: #25D366; }\n        .no-cotizacion { background: #f8d7da; color: #721c24; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }\n        .badge { display: inline-block; background: #48bb78; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; margin-bottom: 15px; }\n        .cotizacion-texto { background: white; padding: 15px; border-radius: 5px; margin-top: 15px; font-family: monospace; font-size: 12px; line-height: 1.4; white-space: pre-wrap; }\n        @media (max-width: 600px) {\n            .detail-grid { grid-template-columns: 1fr; }\n            .content { padding: 20px; }\n            .button { display: block; margin: 10px 0; }\n        }\n    </style>\n</head>\n<body>\n    <div class=\"email-container\">\n        <div class=\"header\">\n            <div class=\"logo\">🔧 Lucam Service</div>\n            <div class=\"tagline\">La precisión que tu seguridad necesita</div>\n        </div>\n        \n        <div class=\"content\">\n            <div style=\"text-align: center; margin-bottom: 20px;\">\n                <div class=\"badge\">${tieneCotizacion ? '💰 CITA + COTIZACIÓN' : '📅 NUEVA CITA'}</div>\n                <h1 style=\"color: #2d3748; margin-bottom: 10px;\">${body.nombre_cliente}</h1>\n                <p style=\"color: #718096;\">Nueva cita técnica asignada</p>\n            </div>\n            \n            <!-- Información del Cliente -->\n            <div class=\"section\">\n                <h2 style=\"color: #667eea; margin-bottom: 15px;\">👤 Información del Cliente</h2>\n                <div class=\"detail-grid\">\n                    <div class=\"detail-item\">\n                        <div class=\"detail-label\">Nombre</div>\n                        <div class=\"detail-value\">${body.nombre_cliente}</div>\n                    </div>\n                    <div class=\"detail-item\">\n                        <div class=\"detail-label\">Teléfono</div>\n                        <div class=\"detail-value\">${body.telefono}</div>\n                    </div>\n                    <div class=\"detail-item\">\n                        <div class=\"detail-label\">Email</div>\n                        <div class=\"detail-value\">${body.email || 'No proporcionado'}</div>\n                    </div>\n                    <div class=\"detail-item\">\n                        <div class=\"detail-label\">Dirección</div>\n                        <div class=\"detail-value\">${body.direccion}</div>\n                    </div>\n                </div>\n            </div>\n            \n            <!-- Detalles de la Cita -->\n            <div class=\"section\">\n                <h2 style=\"color: #667eea; margin-bottom: 15px;\">📅 Detalles de la Cita</h2>\n                <div class=\"detail-grid\">\n                    <div class=\"detail-item\">\n                        <div class=\"detail-label\">Servicio</div>\n                        <div class=\"detail-value\">${body.tipo_servicio}</div>\n                    </div>\n                    <div class=\"detail-item\">\n                        <div class=\"detail-label\">Fecha</div>\n                        <div class=\"detail-value\">${body.fecha_entrega}</div>\n                    </div>\n                    <div class=\"detail-item\">\n                        <div class=\"detail-label\">Hora</div>\n                        <div class=\"detail-value\">${body.hora_inicio} - ${body.hora_fin}</div>\n                    </div>\n                    <div class=\"detail-item\">\n                        <div class=\"detail-label\">Notas</div>\n                        <div class=\"detail-value\">${body.notas || 'Sin notas adicionales'}</div>\n                    </div>\n                </div>\n            </div>\n            \n            <!-- Sección de Cotización -->\n            ${tieneCotizacion ? `\n            <div class=\"section cotizacion-section\">\n                <h2 style=\"color: #d69e2e; margin-bottom: 15px;\">💰 Cotización</h2>\n                \n                <!-- Tabla de Productos -->\n                ${body.productos_cotizados && body.productos_cotizados.length > 0 ? `\n                <h3 style=\"color: #d69e2e; margin-bottom: 10px; font-size: 16px;\">📦 Productos Cotizados</h3>\n                ${generarTablaProductos(body.productos_cotizados)}\n                ` : ''}\n                \n                <!-- Texto Completo de la Cotización -->\n                <h3 style=\"color: #d69e2e; margin: 20px 0 10px 0; font-size: 16px;\">📄 Detalles de la Cotización</h3>\n                <div class=\"cotizacion-texto\">\n${body.cotizacion_texto}\n                </div>\n            </div>\n            ` : `\n            <div class=\"no-cotizacion\">\n                <h3>⚠️ Sin Cotización Registrada</h3>\n                <p>El cliente no solicitó cotización o el agente no la generó automáticamente.</p>\n            </div>\n            `}\n            \n            <!-- Botones de Acción -->\n            <div style=\"text-align: center; margin: 25px 0;\">\n                <a href=\"https://wa.me/${body.telefono}\" class=\"button whatsapp-button\">💬 Contactar por WhatsApp</a>\n                <a href=\"tel:${body.telefono}\" class=\"button\" style=\"background: #4299e1;\">📞 Llamar al Cliente</a>\n            </div>\n            \n            <!-- Información Adicional -->\n            <div style=\"background: #e6fffa; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #38b2ac;\">\n                <h3 style=\"color: #234e52; margin-bottom: 10px; font-size: 14px;\">📋 Información para el Técnico</h3>\n                <ul style=\"color: #234e52; font-size: 13px; padding-left: 20px;\">\n                    <li>Confirmar la cita con el cliente 24 horas antes</li>\n                    <li>Llevar equipo de protección y herramientas necesarias</li>\n                    <li>Verificar disponibilidad de productos en inventario</li>\n                    <li>Documentar cualquier observación durante la visita</li>\n                    <li>La cotización mostrada es preliminar - verificar disponibilidad y precios actuales</li>\n                </ul>\n            </div>\n        </div>\n        \n        <div class=\"footer\">\n            <p>🆔 ID Cita: ${body.cita_id} | 📧 Enviado automáticamente</p>\n            <p>Lucam Service - Sistema Automatizado de Citas</p>\n            <p style=\"margin-top: 10px; font-size: 11px; color: #a0aec0;\">\n                Si recibiste este email por error, por favor contacta al administrador del sistema.\n            </p>\n        </div>\n    </div>\n</body>\n</html>\n`;\n\nconst emailData = {\n  cita_id: body.cita_id,\n  tecnico_email: 'tecnicos@lucamservice.com', // Cambiar por email real\n  asunto: `${tieneCotizacion ? '📋 CITA + COTIZACIÓN' : '📅 NUEVA CITA'} - ${body.tipo_servicio} - ${body.nombre_cliente}`,\n  \n  // Datos del cliente\n  cliente: {\n    nombre: body.nombre_cliente,\n    telefono: body.telefono,\n    email: body.email || 'No proporcionado',\n    direccion: body.direccion\n  },\n  \n  // Datos de la cita\n  cita: {\n    tipo_servicio: body.tipo_servicio,\n    fecha: body.fecha_entrega,\n    hora_inicio: body.hora_inicio,\n    hora_fin: body.hora_fin,\n    notas: body.notas || 'Sin notas adicionales'\n  },\n  \n  // Datos de cotización\n  cotizacion: {\n    tiene_cotizacion: tieneCotizacion,\n    texto_completo: body.cotizacion_texto || '',\n    total_equipos: body.total_equipos || 0,\n    productos: body.productos_cotizados || []\n  },\n  \n  // HTML generado\n  html_content: htmlContent,\n  \n  // Metadata\n  metadata: {\n    timestamp: new Date().toISOString(),\n    flujo: 'email_tecnico_independiente'\n  }\n};\n\nconsole.log('✅ Datos preparados para email técnico');\nconsole.log(`- Cliente: ${emailData.cliente.nombre}`);\nconsole.log(`- Servicio: ${emailData.cita.tipo_servicio}`);\nconsole.log(`- Tiene cotización: ${emailData.cotizacion.tiene_cotizacion}`);\n\nreturn [{ json: emailData }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "02c3db4b-cd82-4841-8416-37592346a983",
+      "name": "Preparar Email Tecnico"
+    },
+    {
+      "parameters": {
+        "fromEmail": "tlalocalli@gmail.com",
+        "toEmail": "={{ $json.cliente.email }}",
+        "subject": "={{ $json.asunto }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html_content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "8aa85727-25c7-4e94-aa8d-39022f3222be",
+      "name": "Enviar Email al Tecnico",
+      "webhookId": "b8cc9185-25df-4275-ad2e-f096e670d6ea"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Respuesta exitosa\nconst emailData = $json;\n\nreturn [{\n  json: {\n    success: true,\n    message: \"Email enviado exitosamente al técnico\",\n    cita_id: emailData.cita_id,\n    cliente: emailData.cliente.nombre,\n    servicio: emailData.cita.tipo_servicio,\n    tiene_cotizacion: emailData.cotizacion.tiene_cotizacion,\n    timestamp: new Date().toISOString(),\n    flujo: 'email_tecnico_independiente'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "d11cdc8a-e230-4679-b13b-f805a5cac67d",
+      "name": "Respuesta Exitosa"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Manejo de errores\nconst error = $input.first().error;\n\nconsole.error('❌ Error en flujo email técnico:', error);\n\nreturn [{\n  json: {\n    success: false,\n    error: error.message,\n    timestamp: new Date().toISOString(),\n    step: 'email_tecnico_independiente',\n    suggestion: 'Verificar datos de entrada y configuración SMTP'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        208
+      ],
+      "id": "79cbe6e9-f94f-4579-8362-ebdab4bffb47",
+      "name": "Manejo Error Email"
+    }
+  ],
+  "pinData": {
+    "Webhook Email Tecnico": [
+      {
+        "json": {
+          "headers": {
+            "content-type": "application/json",
+            "user-agent": "PostmanRuntime/7.49.1",
+            "accept": "*/*",
+            "postman-token": "11300212-f14e-4e3d-92f8-9e1678985b08",
+            "host": "localhost:5678",
+            "accept-encoding": "gzip, deflate, br",
+            "connection": "keep-alive",
+            "content-length": "789"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "cita_id": "TEST-001",
+            "nombre_cliente": "Juan Pérez",
+            "telefono": "5512345678",
+            "email": "manuel.moreno.plaza@outlook.com",
+            "direccion": "Av. Reforma 123, CDMX",
+            "tipo_servicio": "cctv",
+            "fecha_entrega": "2024-01-25",
+            "hora_inicio": "10:00:00",
+            "hora_fin": "11:00:00",
+            "notas": "Casa de 2 pisos, necesita 4 cámaras",
+            "cotizacion_texto": "COTIZACIÓN PRELIMINAR - CCTV\n\n1) Cámara Domo 4MP\n   - Cantidad: 4\n   - Precio unitario: $1,500 MXN\n   - Subtotal equipos: $6,000 MXN\n\nTotal estimado de equipos (sin instalación): $6,000 MXN",
+            "total_equipos": 6000,
+            "productos_cotizados": [
+              {
+                "nombre": "Cámara Domo 4MP",
+                "cantidad": 4,
+                "precio_unitario": 1500,
+                "subtotal": 6000
+              }
+            ]
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/email-tecnico-cotizacion",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "repo_name": "n8n-init",
+  "repo_owner": "ilhuicaminaTenoch",
+  "repo_path": "workflows",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "shared": [
+    {
+      "updatedAt": "2025-11-27T16:44:16.134Z",
+      "createdAt": "2025-11-27T16:44:16.134Z",
+      "role": "workflow:owner",
+      "workflowId": "hJHW9qfckr1UrcWB",
+      "projectId": "WR6tkeQzo7cAVCK0"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-27T16:44:16.134Z",
+  "versionId": "187a1c99-4923-4719-88c2-fd30d13faf22"
+}
