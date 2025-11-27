@@ -1,0 +1,460 @@
+{
+  "active": false,
+  "connections": {
+    "Captura de Workflows": {
+      "main": [
+        [
+          {
+            "node": "Convertir a binario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Si existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nodo Programado": {
+      "main": [
+        [
+          {
+            "node": "Establecer campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizador de Archivos": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Uploader de Archivos": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Establecer campos": {
+      "main": [
+        [
+          {
+            "node": "Listar archivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar archivos": {
+      "main": [
+        [
+          {
+            "node": "Combinar archivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convertir a binario": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Si existe": {
+      "main": [
+        [
+          {
+            "node": "Actualizador de Archivos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Uploader de Archivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combinar archivos": {
+      "main": [
+        [
+          {
+            "node": "Captura de Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-11-27T18:06:32.527Z",
+  "id": "5XfThqoDkEaFmFxV",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "respaldar workflows en github",
+  "nodes": [
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "id": "bdd7cf98-b90e-49fb-9573-32d194b1f804",
+      "name": "Captura de Workflows",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        656
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "n8nApi": {
+          "id": "M3GrYqDo69H4FTNG",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2368,
+        656
+      ],
+      "id": "1a2ec06f-e2b0-4459-9380-b3be4fb816ae",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2592,
+        384
+      ],
+      "id": "2fc3f099-51c3-4399-9b90-1fb6c6fd7f07",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        656
+      ],
+      "id": "c7419fc8-c740-47ee-afd1-b94024962d44",
+      "name": "Nodo Programado"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $('Establecer campos').item.json['Repository Owner'] }}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $('Establecer campos').item.json['Repository Name'] }}",
+          "mode": "name"
+        },
+        "filePath": "=flujos/{{ $binary.data.fileName }}",
+        "binaryData": true,
+        "commitMessage": "={{ $('Establecer campos').item.json.commitDate }}"
+      },
+      "id": "b5b91dfd-972c-4b89-9642-880b2a2e90f5",
+      "name": "Actualizador de Archivos",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        2816,
+        656
+      ],
+      "webhookId": "ad758c2a-4f50-4db1-a3f3-a422c67ac0a2",
+      "credentials": {
+        "githubApi": {
+          "id": "AFIftd62izZIEWd3",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $('Establecer campos').item.json['Repository Owner'] }}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $('Establecer campos').item.json['Repository Name'] }}",
+          "mode": "name"
+        },
+        "filePath": "=flujos/{{ $binary.data.fileName }}",
+        "binaryData": true,
+        "commitMessage": "={{ $('Establecer campos').item.json.commitDate }}"
+      },
+      "id": "d4f069ae-5ac3-4963-80b3-ad1f31fa6b29",
+      "name": "Uploader de Archivos",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        2816,
+        848
+      ],
+      "webhookId": "3ba252a0-adac-44b6-9376-d870f52e28bd",
+      "credentials": {
+        "githubApi": {
+          "id": "AFIftd62izZIEWd3",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1d52ea6-5912-4988-94c2-115ad59c1996",
+              "name": "Repository Owner",
+              "value": "ilhuicaminaTenoch",
+              "type": "string"
+            },
+            {
+              "id": "1c15b2e1-bf09-4643-8bba-3215119d2d6b",
+              "name": "Repository Name",
+              "value": "n8n-init",
+              "type": "string"
+            },
+            {
+              "id": "712f49ff-8f02-4ac3-aee8-11db8ebe5843",
+              "name": "commitDate",
+              "value": "={{ (() => {\n  const now = new Date();\n  const day = String(now.getDate()).padStart(2, '0');\n  const month = String(now.getMonth() + 1).padStart(2, '0');\n  const year = now.getFullYear();\n  const hours = String(now.getHours()).padStart(2, '0');\n  const minutes = String(now.getMinutes()).padStart(2, '0');\n  return `${day}-${month}-${year}/${hours}:${minutes}`;\n})() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1248,
+        656
+      ],
+      "id": "c39c56e6-5d05-4c31-84ec-ff44c6c8bf4b",
+      "name": "Establecer campos"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $json[\"Repository Owner\"] }}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $json['Repository Name'] }}",
+          "mode": "name"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1472,
+        656
+      ],
+      "id": "c6588f24-043c-4e21-8754-c731c2666c32",
+      "name": "Listar archivos",
+      "webhookId": "05c29369-ddf5-4cea-ad82-2360b9460243",
+      "alwaysOutputData": true,
+      "credentials": {
+        "githubApi": {
+          "id": "AFIftd62izZIEWd3",
+          "name": "GitHub account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "jsonToBinary",
+        "options": {
+          "fileName": "={{ $json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ $json.id }}.json"
+        }
+      },
+      "id": "487381f9-327a-4d11-84a2-6cc0bfc916b9",
+      "name": "Convertir a binario",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        2144,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['Combinar archivos'].json.name }}",
+              "operation": "contains",
+              "value2": "={{ $binary.data.fileName }}"
+            }
+          ]
+        }
+      },
+      "id": "368d44c7-9f05-4bce-9be1-08e888c48a70",
+      "name": "Si existe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2592,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#  🦾Respalda tus workflows en github\n\n### Agradecimiento a: Matias Astudillo, miembro de Vibe Community VIP\n### Únete a la [comunidad exclusiva](https://www.skool.com/vibe-community-vip/about) \n\n![captura](https://subir-imagen.com/images/2025/07/28/Captura-de-pantalla-2025-07-28-171752.png)",
+        "height": 512,
+        "width": 624,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        32
+      ],
+      "id": "4f9d3064-957c-47f3-8775-ab8773d6944d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 🛡️ Workflow de Respaldo Automático de Workflows en N8N\n\nEste workflow se ejecuta **diariamente a las 12:00 a.m.** y respalda todos los workflows de N8N en un repositorio de GitHub.\n\n---\n\n### ⚙️ Configuración Inicial\n\n* **Repository Owner**: tu usuario de GitHub\n* **Repository Name**: nombre del repositorio\n* **Commit Date**: fecha y hora actual (`DD-MM-YYYY/HH:SS`)\n\n---\n\n### 🔐 Autenticación\n\n**GitHub:**\n\n1. Crea un repositorio en GitHub.\n2. Ve a `Settings > Developer Settings > Tokens (classic)`.\n3. Genera un token con permisos (`write-packages`).\n4. Usa el token en las credenciales de GitHub en N8N.\n\n**N8N:**\n\n1. Ve a `Settings > API` en tu instancia.\n2. Genera un token.\n3. Usa como Base URL:\n\n   ```\n   https://TU_INSTANCIA.com/api/v1\n   ```\n---\n\n### 🔄 Flujo del Proceso\n\n1. Se listan los archivos actuales del repositorio (GitHub).\n2. Se obtienen todos los workflows desde N8N (JSON).\n3. Se convierten a binario.\n4. En un loop:\n\n   * Si el archivo existe → se actualiza.\n   * Si no existe → se sube como nuevo.\n\n---\n\n### ✅ Resultado\n\nTodos los workflows quedan respaldados en GitHub con un commit que incluye la fecha y hora.\n\n\n\n",
+        "height": 1168,
+        "width": 928,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "28498019-5461-4a28-8397-10aac9d6bb48",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "![Logo Vibe VIP](https://subir-imagen.com/images/2025/07/25/Logo-Vibe-VIP.png)",
+        "height": 176,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        32
+      ],
+      "id": "4984bf86-e9d9-4ddf-8bfd-bbfa7b51331f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        656
+      ],
+      "id": "9d1934ac-25c9-4a03-8328-be659b9c9f33",
+      "name": "Combinar archivos"
+    }
+  ],
+  "pinData": {},
+  "repo_name": "n8n-init",
+  "repo_owner": "ilhuicaminaTenoch",
+  "repo_path": "workflows",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "shared": [
+    {
+      "updatedAt": "2025-11-27T18:06:32.527Z",
+      "createdAt": "2025-11-27T18:06:32.527Z",
+      "role": "workflow:owner",
+      "workflowId": "5XfThqoDkEaFmFxV",
+      "projectId": "WR6tkeQzo7cAVCK0"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-27T18:10:59.610Z",
+  "versionId": "4411e67a-26df-44f3-80cb-beb9ef116e22"
+}
