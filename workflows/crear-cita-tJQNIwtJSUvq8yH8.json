@@ -1,25 +1,17 @@
 {
-  "updatedAt": "2025-11-27T16:43:10.641Z",
+  "updatedAt": "2025-11-28T20:03:22.251Z",
   "createdAt": "2025-11-27T16:43:10.641Z",
   "id": "tJQNIwtJSUvq8yH8",
   "name": "Crear Cita",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "/crear-cita",
-        "options": {
-          "responseHeaders": {
-            "entries": [
-              {
-                "name": "Content-Type",
-                "value": " application/json"
-              }
-            ]
-          }
-        }
+        "responseMode": "responseNode",
+        "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
@@ -53,7 +45,13 @@
         208
       ],
       "id": "6111b5bc-32a7-44ea-b98b-9a4d3ca09f7c",
-      "name": "Create an event"
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "oxbrcrpqzta3DGxS",
+          "name": "Google Calendar account"
+        }
+      }
     },
     {
       "parameters": {
@@ -102,7 +100,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1344,
+        1360,
         208
       ],
       "id": "109501c3-0d39-494b-ab64-32cf93099b93",
@@ -144,12 +142,18 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1568,
+        1840,
         208
       ],
       "id": "83c4e877-526e-488b-bf87-35a7a58fc7d6",
       "name": "Send a message",
-      "webhookId": "079a17ca-4cde-44a7-a817-03dec143698b"
+      "webhookId": "079a17ca-4cde-44a7-a817-03dec143698b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cDsRAWI7wL2LMm0z",
+          "name": "Gmail account"
+        }
+      }
     },
     {
       "parameters": {
@@ -309,7 +313,13 @@
         208
       ],
       "id": "a56571f7-af30-46a6-8d7b-d24ad49dce0f",
-      "name": "Insertar Cita"
+      "name": "Insertar Cita",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -339,6 +349,21 @@
       "id": "e5d5ac08-60f7-475b-8cd6-1ae37ff9084c",
       "name": "Llamar Flujo Cotizacion",
       "disabled": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"cita_id\": {{ $json.cita_id }},\n\"event_id\": \"{{ $json.event_id }}\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1568,
+        208
+      ],
+      "id": "e16a705b-190b-4cd0-aa9e-406c0e9d6b96",
+      "name": "Respond to Webhook"
     }
   ],
   "connections": {
@@ -390,7 +415,7 @@
       "main": [
         [
           {
-            "node": "Send a message",
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
@@ -407,16 +432,34 @@
           }
         ]
       ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "3149ba21-ff12-4dbe-9d0d-2dc85fad0343",
-  "triggerCount": 0,
+  "versionId": "74bc9d3b-6be4-4cab-b836-94b5238c43c4",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2025-11-27T16:43:10.641Z",
