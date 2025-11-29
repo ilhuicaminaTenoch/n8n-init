@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-29T04:58:04.353Z",
+  "updatedAt": "2025-11-29T05:31:24.759Z",
   "createdAt": "2025-11-28T20:55:19.764Z",
   "id": "8gP78fW1rv7UB5v9",
   "name": "Crear Cita",
@@ -17,7 +17,7 @@
       "typeVersion": 2.1,
       "position": [
         0,
-        224
+        256
       ],
       "id": "6fe5efa1-e514-4346-b445-fa65e0e951fa",
       "name": "Webhook",
@@ -41,8 +41,8 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        1104,
-        224
+        1552,
+        400
       ],
       "id": "0665d3ca-3d36-475b-b29e-e45e50d69c03",
       "name": "Create an event",
@@ -72,26 +72,32 @@
             {
               "id": "ad25366e-b338-443e-a05f-d71b57f77dde",
               "name": "fecha_inicio",
-              "value": "={{ $json.start.dateTime }}",
+              "value": "={{ $json.hora_inicio }}",
               "type": "string"
             },
             {
               "id": "33afcd98-c66b-4fdc-b0e3-a7951eb511d5",
               "name": "fecha_fin",
-              "value": "={{ $json.end.dateTime }}",
-              "type": "string"
-            },
-            {
-              "id": "224b5674-f351-4909-a1f0-b9593c313859",
-              "name": "link_calendario",
-              "value": "={{ $json.htmlLink }}",
+              "value": "={{ $json.hora_fin }}",
               "type": "string"
             },
             {
               "id": "970bcdf7-3aa2-47c9-9ef6-6db31601c4da",
               "name": "cita_id",
-              "value": "={{ $('Insertar Cita').item.json.id }}",
+              "value": "={{ $json.id }}",
               "type": "number"
+            },
+            {
+              "id": "b1ba552f-b345-4601-af82-e5ec87fc79bd",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "3e91adb7-0b98-48c8-9c6a-20c4727af1f8",
+              "name": "nombre_cliente",
+              "value": "={{ $json.nombre_cliente }}",
+              "type": "string"
             }
           ]
         },
@@ -100,8 +106,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1344,
-        224
+        1552,
+        160
       ],
       "id": "e184b33a-98dd-4e17-abb8-f4e17d13b283",
       "name": "Formatear Respuesta"
@@ -114,7 +120,7 @@
       "typeVersion": 2,
       "position": [
         448,
-        224
+        256
       ],
       "id": "8304d800-fae9-48bb-bc87-cb41fa95abca",
       "name": "Construir DateTime"
@@ -127,23 +133,23 @@
       "typeVersion": 2,
       "position": [
         224,
-        224
+        256
       ],
       "id": "6ea6b5a0-03e7-4e54-8f6f-b7976d35926a",
       "name": "Validar Cita"
     },
     {
       "parameters": {
-        "sendTo": "={{ $('Insertar Cita').item.json.email }}",
-        "subject": "=Confirmación de Cita Técnica - {{ $('Insertar Cita').item.json.nombre_cliente }}",
-        "message": "=<!DOCTYPE html>\n<html>\n<head>\n    <style>\n        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }\n        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }\n        .content { background: #f9f9f9; padding: 30px; }\n        .details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }\n        .detail-row { display: flex; margin-bottom: 10px; }\n        .detail-icon { width: 30px; font-weight: bold; }\n        .footer { background: #2d3748; color: white; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; font-size: 12px; }\n        .button { background: #667eea; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0; }\n    </style>\n</head>\n<body>\n    <div class=\"header\">\n        <h1>Lucam Service</h1>\n        <p>La precisión que tu seguridad necesita</p>\n    </div>\n    \n    <div class=\"content\">\n        <h2>Hola {{ $('Insertar Cita').item.json.nombre_cliente }},</h2>\n        <p style=\"background: #48bb78; color: white; padding: 10px; border-radius: 5px; display: inline-block;\">✅ CITA CONFIRMADA</p>\n        \n        <p>Tu cita técnica ha sido agendada exitosamente:</p>\n        \n        <div class=\"details\">\n            <div class=\"detail-row\"><div class=\"detail-icon\">📅</div><div><strong>Fecha:</strong> {{ $('Construir DateTime').item.json.body.fecha_preferida }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">⏰</div><div><strong>Hora:</strong> {{ $('Construir DateTime').item.json.hora_inicio }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">📍</div><div><strong>Dirección:</strong> {{ $('Insertar Cita').item.json.direccion }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">🔧</div><div><strong>Servicio:</strong> {{ $('Insertar Cita').item.json.tipo_servicio}}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">📞</div><div><strong>Teléfono:</strong> {{ $('Insertar Cita').item.json.telefono }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">📧</div><div><strong>Email:</strong> {{$('Insertar Cita').item.json.email}}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">📝</div><div><strong>Notas:</strong> {{ $('Insertar Cita').item.json.notas}}</div></div>\n            \n        </div>\n        \n        <div style=\"text-align: center; margin: 25px 0;\">\n            <a href=\"https://calendar.google.com/calendar/render?action=TEMPLATE&text=Cita+Técnica+{{ $('Insertar Cita').item.json.nombre_cliente }}&dates={{ $json.fecha_inicio }}/{{ $json.fecha_fin }}&details=Visita+técnica+para+{{ $('Insertar Cita').item.json.tipo_servicio }}&location={{ $('Insertar Cita').item.json.direccion }}\" class=\"button\">\n                📅 Agregar a Google Calendar\n            </a>\n        </div>\n        \n        <p><strong>Recordatorio:</strong> Te enviaremos un recordatorio 24 horas antes.</p>\n    </div>\n    \n    <div class=\"footer\">\n        <p>Lucam Service • soporte@lucamservice.com • +52 55 1234 5678</p>\n        <p>Este es un correo automático. Por favor no responder.</p>\n    </div>\n</body>\n</html>",
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Confirmación de Cita Técnica - {{ $json.nombre_cliente }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n    <style>\n        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }\n        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }\n        .content { background: #f9f9f9; padding: 30px; }\n        .details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }\n        .detail-row { display: flex; margin-bottom: 10px; }\n        .detail-icon { width: 30px; font-weight: bold; }\n        .footer { background: #2d3748; color: white; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; font-size: 12px; }\n        .button { background: #667eea; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0; }\n    </style>\n</head>\n<body>\n    <div class=\"header\">\n        <h1>Lucam Service</h1>\n        <p>La precisión que tu seguridad necesita</p>\n    </div>\n    \n    <div class=\"content\">\n        <h2>Hola, {{ $json.nombre_cliente }}</h2>\n        <p style=\"background: #48bb78; color: white; padding: 10px; border-radius: 5px; display: inline-block;\">✅ CITA CONFIRMADA</p>\n        \n        <p>Tu cita técnica ha sido agendada exitosamente:</p>\n        \n        <div class=\"details\">\n            <div class=\"detail-row\"><div class=\"detail-icon\">📅</div><div><strong>Fecha:</strong> {{ $('Construir DateTime').item.json.body.fecha_preferida }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">⏰</div><div><strong>Hora:</strong> {{ $('Construir DateTime').item.json.hora_inicio }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">📍</div><div><strong>Dirección:</strong> {{ $('If').item.json.direccion }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">🔧</div><div><strong>Servicio:</strong> {{ $('If').item.json.tipo_servicio }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">📞</div><div><strong>Teléfono:</strong> {{ $('If').item.json.telefono }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">📧</div><div><strong>Email:</strong> {{ $('If').item.json.email }}</div></div>\n            <div class=\"detail-row\"><div class=\"detail-icon\">📝</div><div><strong>Notas:</strong> {{ $('If').item.json.notas }}</div></div>\n            \n        </div>\n        \n        <div style=\"text-align: center; margin: 25px 0;\">\n            <a href=\"https://calendar.google.com/calendar/render?action=TEMPLATE&text=Cita+Técnica+{{ $('If').item.json.nombre_cliente }}&dates={{ $json.fecha_inicio }}/{{ $json.fecha_fin }}&details=Visita+técnica+para+{{ $('If').item.json.tipo_servicio }}&location={{ $('If').item.json.direccion }}\" class=\"button\">\n                📅 Agregar a Google Calendar\n            </a>\n        </div>\n        \n        <p><strong>Recordatorio:</strong> Te enviaremos un recordatorio 24 horas antes.</p>\n    </div>\n    \n    <div class=\"footer\">\n        <p>Lucam Service • soporte@lucamservice.com • +52 55 1234 5678</p>\n        <p>Este es un correo automático. Por favor no responder.</p>\n    </div>\n</body>\n</html>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1824,
-        224
+        1776,
+        112
       ],
       "id": "f1a00e61-3204-4529-b965-6d8ddfc19830",
       "name": "Send a message",
@@ -309,8 +315,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        880,
-        224
+        1328,
+        400
       ],
       "id": "b846b41a-1e00-464d-95c9-49c946bc3893",
       "name": "Insertar Cita",
@@ -344,7 +350,7 @@
       "typeVersion": 4.3,
       "position": [
         0,
-        0
+        -112
       ],
       "id": "937cd427-9c4b-4be0-9bfa-d06400d201a2",
       "name": "Llamar Flujo Cotizacion",
@@ -359,8 +365,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        1552,
-        224
+        1776,
+        352
       ],
       "id": "2bd0ddb9-21b4-47d4-b946-a7f8b44f6e4c",
       "name": "Respond to Webhook"
@@ -368,7 +374,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT id\nFROM citas\nWHERE email = $1\n  AND tipo_servicio = $2\n  AND telefono = $3\n  AND hora_inicio = $4\n  AND fecha_entrega::date = $5\nLIMIT 1;\n",
+        "query": "SELECT *,\n  (COUNT(*) OVER()) > 0 as found,\n    COUNT(*) OVER() as total_count\nFROM citas\nWHERE email = $1\n  AND tipo_servicio = $2\n  AND telefono = $3\n  AND hora_inicio = $4\n  AND fecha_entrega::date = $5\nLIMIT 1;\n",
         "options": {
           "queryReplacement": "={{ $json.body.email }},{{ $json.body.tipo_servicio }},{{ $json.body.telefono }},{{ $json.hora_inicio }},{{ $json.body.fecha_preferida }}"
         }
@@ -376,8 +382,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        656,
-        224
+        672,
+        256
       ],
       "id": "9c463881-21df-4220-b94f-000df1ee39fd",
       "name": "Buscar cita existente",
@@ -387,6 +393,53 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2bce8ae8-f23e-4c8b-97f8-09959d6c0625",
+              "leftValue": "={{ $json[\"id\"].toString() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        256
+      ],
+      "id": "ec288d69-6bfd-4d91-ad16-3bf6df856850",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Nodo: \"Procesar Resultado Consulta\"\n// Este nodo asegura que siempre haya una salida, incluso si no hay resultados\n\nconst postgresResult = $input.all();\n\nconsole.log('🔍 Resultado de consulta PostgreSQL:', postgresResult);\n\nif (postgresResult.length === 0) {\n  // No se encontraron registros\n  console.log('✅ No se encontraron citas duplicadas');\n  return [{\n    json: {\n      found: false,\n      message: \"No se encontraron citas duplicadas\",\n      duplicate_count: 0,\n      data: null\n    }\n  }];\n} else {\n  // Se encontraron registros\n  console.log('⚠️ Se encontraron citas duplicadas:', postgresResult.length);\n  return [{\n    json: {\n      found: true,\n      message: \"Se encontraron citas duplicadas\",\n      duplicate_count: postgresResult.length,\n      data: postgresResult[0].json // Tomamos el primer resultado\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        256
+      ],
+      "id": "c0ba5794-c758-433c-8481-097a2367c67c",
+      "name": "Procesar Resultado Consulta"
     }
   ],
   "connections": {
@@ -405,7 +458,7 @@
       "main": [
         [
           {
-            "node": "Formatear Respuesta",
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
@@ -441,6 +494,11 @@
             "node": "Respond to Webhook",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -458,20 +516,43 @@
     },
     "Respond to Webhook": {
       "main": [
-        [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Buscar cita existente": {
       "main": [
         [
           {
+            "node": "Procesar Resultado Consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Formatear Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "Insertar Cita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar Resultado Consulta": {
+      "main": [
+        [
+          {
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -489,7 +570,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "32268d95-6426-42db-9005-37a0eea6bed5",
+  "versionId": "749a9249-16a1-4530-a5fd-cea1ea63f798",
   "triggerCount": 1,
   "shared": [
     {
