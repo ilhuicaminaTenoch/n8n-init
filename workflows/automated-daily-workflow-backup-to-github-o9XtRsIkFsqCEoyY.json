@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2025-11-28T18:10:26.706Z",
+  "updatedAt": "2025-11-28T23:58:22.444Z",
   "createdAt": "2025-11-28T17:04:10.278Z",
   "id": "o9XtRsIkFsqCEoyY",
   "name": "Automated daily workflow backup to GitHub",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -400,13 +400,17 @@
     }
   },
   "settings": {},
-  "staticData": null,
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "meta": {
     "templateId": "4064"
   },
   "pinData": {},
   "versionId": "f86deace-ae08-4b65-86c2-c6cd46557612",
-  "triggerCount": 0,
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2025-11-28T17:04:10.278Z",
