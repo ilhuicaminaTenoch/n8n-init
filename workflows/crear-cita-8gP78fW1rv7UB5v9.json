@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-29T05:31:24.759Z",
+  "updatedAt": "2025-12-01T16:11:59.650Z",
   "createdAt": "2025-11-28T20:55:19.764Z",
   "id": "8gP78fW1rv7UB5v9",
   "name": "Crear Cita",
@@ -148,8 +148,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1776,
-        112
+        1824,
+        288
       ],
       "id": "f1a00e61-3204-4529-b965-6d8ddfc19830",
       "name": "Send a message",
@@ -177,17 +177,17 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "nombre_cliente": "={{ $json.body.nombre }}",
-            "telefono": "={{ $json.body.telefono }}",
-            "email": "={{ $json.body.email }}",
-            "tipo_servicio": "={{ $json.body.tipo_servicio }}",
-            "direccion": "={{ $json.body.direccion }}",
-            "fecha_entrega": "={{ $json.body.fecha_preferida }}",
-            "hora_inicio": "={{ $json.hora_inicio }}",
-            "hora_fin": "={{ $json.hora_fin }}",
-            "estado": "={{ $json.estado }}",
+            "nombre_cliente": "={{ $('Construir DateTime').item.json.body.nombre }}",
+            "telefono": "={{ $('Construir DateTime').item.json.body.telefono }}",
+            "email": "={{ $('Construir DateTime').item.json.body.email }}",
+            "tipo_servicio": "={{ $('Construir DateTime').item.json.body.tipo_servicio }}",
+            "direccion": "={{ $('Construir DateTime').item.json.body.direccion }}",
+            "fecha_entrega": "={{ $('Construir DateTime').item.json.body.fecha_preferida }}",
+            "hora_inicio": "={{ $('Construir DateTime').item.json.hora_inicio }}",
+            "hora_fin": "={{ $('Construir DateTime').item.json.hora_fin }}",
+            "estado": "={{ $('Construir DateTime').item.json.estado }}",
             "created_at": "={{ $now }}",
-            "notas": "={{ $json.body.notas }}"
+            "notas": "={{ $('Construir DateTime').item.json.notas }}"
           },
           "matchingColumns": [
             "id"
@@ -315,8 +315,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1328,
-        400
+        1216,
+        384
       ],
       "id": "b846b41a-1e00-464d-95c9-49c946bc3893",
       "name": "Insertar Cita",
@@ -365,8 +365,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        1776,
-        352
+        2112,
+        288
       ],
       "id": "2bd0ddb9-21b4-47d4-b946-a7f8b44f6e4c",
       "name": "Respond to Webhook"
@@ -374,7 +374,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT *,\n  (COUNT(*) OVER()) > 0 as found,\n    COUNT(*) OVER() as total_count\nFROM citas\nWHERE email = $1\n  AND tipo_servicio = $2\n  AND telefono = $3\n  AND hora_inicio = $4\n  AND fecha_entrega::date = $5\nLIMIT 1;\n",
+        "query": "SELECT COUNT(*) record_count\nFROM citas\nWHERE email = $1\n  AND tipo_servicio = $2\n  AND telefono = $3\n  AND hora_inicio = $4\n  AND fecha_entrega::date = $5\n",
         "options": {
           "queryReplacement": "={{ $json.body.email }},{{ $json.body.tipo_servicio }},{{ $json.body.telefono }},{{ $json.hora_inicio }},{{ $json.body.fecha_preferida }}"
         }
@@ -406,12 +406,11 @@
           "conditions": [
             {
               "id": "2bce8ae8-f23e-4c8b-97f8-09959d6c0625",
-              "leftValue": "={{ $json[\"id\"].toString() }}",
-              "rightValue": "",
+              "leftValue": "={{ $json.record_count.toNumber() }}",
+              "rightValue": 0,
               "operator": {
-                "type": "string",
-                "operation": "notEmpty",
-                "singleValue": true
+                "type": "number",
+                "operation": "gt"
               }
             }
           ],
@@ -422,24 +421,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1104,
+        928,
         256
       ],
       "id": "ec288d69-6bfd-4d91-ad16-3bf6df856850",
       "name": "If"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Nodo: \"Procesar Resultado Consulta\"\n// Este nodo asegura que siempre haya una salida, incluso si no hay resultados\n\nconst postgresResult = $input.all();\n\nconsole.log('🔍 Resultado de consulta PostgreSQL:', postgresResult);\n\nif (postgresResult.length === 0) {\n  // No se encontraron registros\n  console.log('✅ No se encontraron citas duplicadas');\n  return [{\n    json: {\n      found: false,\n      message: \"No se encontraron citas duplicadas\",\n      duplicate_count: 0,\n      data: null\n    }\n  }];\n} else {\n  // Se encontraron registros\n  console.log('⚠️ Se encontraron citas duplicadas:', postgresResult.length);\n  return [{\n    json: {\n      found: true,\n      message: \"Se encontraron citas duplicadas\",\n      duplicate_count: postgresResult.length,\n      data: postgresResult[0].json // Tomamos el primer resultado\n    }\n  }];\n}"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        880,
-        256
-      ],
-      "id": "c0ba5794-c758-433c-8481-097a2367c67c",
-      "name": "Procesar Resultado Consulta"
     }
   ],
   "connections": {
@@ -458,7 +444,7 @@
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Send a message",
             "type": "main",
             "index": 0
           }
@@ -491,11 +477,6 @@
       "main": [
         [
           {
-            "node": "Respond to Webhook",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Send a message",
             "type": "main",
             "index": 0
@@ -523,7 +504,7 @@
       "main": [
         [
           {
-            "node": "Procesar Resultado Consulta",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -548,11 +529,11 @@
         ]
       ]
     },
-    "Procesar Resultado Consulta": {
+    "Send a message": {
       "main": [
         [
           {
-            "node": "If",
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
@@ -570,7 +551,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "749a9249-16a1-4530-a5fd-cea1ea63f798",
+  "versionId": "0a0a6fe9-9e04-4e8f-8932-9f130e52a673",
   "triggerCount": 1,
   "shared": [
     {
