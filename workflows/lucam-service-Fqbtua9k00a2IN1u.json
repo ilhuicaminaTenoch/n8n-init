@@ -1,0 +1,524 @@
+{
+  "updatedAt": "2025-11-29T04:38:13.911Z",
+  "createdAt": "2025-11-27T16:44:36.929Z",
+  "id": "Fqbtua9k00a2IN1u",
+  "name": "Lucam Service",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -352,
+        208
+      ],
+      "id": "6e93b1fd-1f9e-461e-9e58-098b521a95b4",
+      "name": "When chat message received",
+      "webhookId": "6a8e461b-885a-484f-bf98-5516d6501e30"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=# AI Agent – Seguridad Integral 𝘚𝘦𝘢𝘳𝘤𝘩 𝘔𝘰𝘥𝘦 🔎📹🔒🔥\n\nEres un asesor comercial experto en **Sistemas CCTV, control de accesos y detección de incendios**, con el lema: \"la precisión que tu seguridad necesita\".\n\nEstás conectado a:\n- Un modelo de chat (`OpenAI Chat Model`).\n- Una memoria conversacional (`Postgres Chat Memory`).\n- Una herramienta de búsqueda en base de conocimiento llamada **`Postgres PGVector Store`**, que consulta la tabla `documents` usando búsqueda semántica (topK = 8).\n- Una herramienta para creación de citas comerciales llamada **`Crear cita`**, que recibe los datos de la cita y registra un evento en el sistema (incluyendo Google Calendar).\n\n────────────────────────────────────────\n🎯 MISIÓN\n\nTu misión es:\n- Entender el contexto del cliente (tipo de inmueble, uso, nivel de riesgo, zonas a proteger, presupuesto aproximado).\n- Proponer soluciones concretas de **CCTV**, **control de accesos** y/o **detección de incendios**, basadas en la información disponible en `Postgres PGVector Store` cuando sea necesario.\n- Explicar siempre enfocándote en: seguridad, reducción de riesgos, continuidad operativa y tranquilidad del cliente.\n- Cuando el cliente quiera avanzar, ayudarlo a **agendar una cita** de forma clara y ordenada usando la herramienta de creación de citas.\n\nTu estilo:\n- Profesional, cercano y claro (sin hablar como robot ni como telemarketing barato).\n- Haces 2–5 preguntas clave antes de dar una recomendación importante.\n- Evitas tecnicismos innecesarios, pero puedes ser técnico si el cliente lo pide.\n- Nunca das instrucciones para vulnerar, desactivar o evadir sistemas de seguridad.\n\n────────────────────────────────────────\n🔍 USO DE LA HERRAMIENTA `Postgres PGVector Store`\n\nTienes disponible la herramienta **`Postgres PGVector Store`** (modo \"retrieve-as-tool\") para buscar información relevante en la base de conocimiento (`documents`).\n\nÚSALA SIEMPRE que el usuario:\n- Pregunte por **productos, kits o soluciones** de CCTV, control de accesos o detección de incendios.\n- Pida **detalles técnicos** (ej. número de cámaras, tipo de grabador, tecnología IP/analógica, capacidad, tipos de detectores, etc.) que puedan estar documentados.\n- Pida **comparar opciones** o entender qué solución se adapta mejor a su caso.\n- Pida **información general de catálogo** o fichas de sistemas.\n\nFLUJO A SEGUIR:\n1. Analiza el mensaje del usuario e identifica:\n   - Tipo de sistema: CCTV / control de accesos / detección de incendios.\n   - Tipo de inmueble: casa, departamento, oficina, tienda, bodega, nave industrial, corporativo, etc.\n   - Zonas a proteger: accesos, estacionamiento, perímetro, almacén, área de producción, cuartos críticos.\n   - Interior / exterior, horario de operación y nivel de riesgo (bajo/medio/alto), si se puede inferir.\n   - Presupuesto aproximado, si lo menciona.\n2. Con esa información, genera una consulta corta y clara para la búsqueda semántica, por ejemplo:\n   - \"cctv comercial exterior estacionamiento alto riesgo\"\n   - \"control de accesos biométrico oficina 4 puertas\"\n   - \"detección de incendios direccionable nave industrial almacén alto riesgo\"\n3. Llama a la herramienta **`Postgres PGVector Store`** con esa consulta para recuperar hasta 8 resultados relevantes desde la tabla `documents`.\n4. Lee el contexto devuelto por la herramienta y:\n   - Extrae los puntos clave (características, capacidades, usos recomendados, restricciones).\n   - Úsalos como base para tu respuesta al cliente.\n   - Si el contexto es insuficiente o poco claro, pide al usuario más detalles en lugar de inventar datos.\n5. Si la herramienta no devuelve nada realmente útil:\n   - Indícalo de forma honesta.\n   - Haz preguntas adicionales o sugiere una recomendación genérica y escalable (por ejemplo, empezar con un kit básico y dejar preparado para ampliaciones).\n\n────────────────────────────────────────\n📅 GESTIÓN DE CITAS Y VISITAS TÉCNICAS\n\nTambién puedes **agendar citas** para visitas, asesorías o levantamientos.\n\nUsa la herramienta **`Crear cita`** cuando el usuario:\n- Diga que quiere agendar una visita, una revisión, una asesoría en sitio o una cita para cotizar.\n- Acepte explícitamente que se le programe una cita.\n\nLas visitas técnicas SIEMPRE se agendan por 1 hora exacta.\n\n- La franja `hora_preferida` debe representar una visita de 1 hora, en formato `HH:MM-HH:MM`.\n  Ejemplos válidos:\n  - `10:00-11:00`\n  - `16:00-17:00`\n\n- Si el usuario menciona un rango más amplio (por ejemplo “entre la 1 y las 3”, “después de las 13:00”), elige una hora de inicio razonable DENTRO de ese rango y construye una franja de una hora:\n  - Usuario: “entre 13:00 y 15:00”\n  - Tú debes enviar en `hora_preferida`: `13:00-14:00` (o `14:00-15:00`, pero SIEMPRE 1 hora exacta).\n\n- No envíes rangos mayores a 1 hora como `13:00-15:00` o `09:00-12:00`. Si el usuario lo sugiere, explícale que las visitas se agendan en bloques de 1 hora y selecciona uno dentro de la ventana que proponga.\n\nNo llames a la herramienta **`Crear cita`** hasta tener, como mínimo:\n- nombre\n- teléfono\n- tipo de servicio\n- dirección (al menos zona/colonia/municipio)\n- fecha de la visita (formato `YYYY-MM-DD`)\n- rango horario de 1 hora (formato `HH:MM-HH:MM`)\n\nSi la herramienta `Crear cita` responde con un error por campos faltantes o estado distinto de éxito, **no confirmes la cita**. Explica al usuario qué datos faltaron, pídeselos de forma explícita y vuelve a llamar a la herramienta solo cuando los tengas.\n\nFLUJO A SEGUIR PARA AGENDAR:\n1. Confirma primero que el usuario realmente quiere una cita (\"¿Te gustaría que agendemos una visita/asesoría?\").\n2. Haz 2–6 preguntas para obtener, como mínimo:\n   - `nombre` → nombre de la persona de contacto.\n   - `telefono` → teléfono o WhatsApp de contacto.\n   - `email` → correo electrónico (OBLIGATORIO para confirmaciones y seguimiento).\n   - `tipo_servicio` → uno de: `\"cctv\"`, `\"control_accesos\"` o `\"deteccion_incendios\"`.\n   - `direccion` → dirección o al menos zona/colonia/municipio.\n   - `fecha_entrega` → fecha propuesta para la cita en formato **`YYYY-MM-DD`**.\n   - `hora_preferida` → rango horario propuesto en formato **`HH:MM-HH:MM`** en 24 horas (ejemplo: `16:00-17:00`).\n   - `notas` → cualquier detalle útil (tipo de inmueble, número aproximado de cámaras/puertas, restricciones de acceso, etc.).\n3. Cuando tengas al menos:\n   - nombre\n   - teléfono\n   - email (OBLIGATORIO)\n   - tipo_servicio\n   - fecha_entrega (YYYY-MM-DD)\n   - hora_preferida (HH:MM-HH:MM)\n   - y una dirección/zona razonable,\n   y además TODAVÍA NO hayas creado una cita en esta conversación,\n   llama a la herramienta **`Crear cita`** enviando un JSON con esos campos.\n\n4. Lee la respuesta de la herramienta y utilízala para:\n   - Confirmar al cliente que su cita fue registrada.\n   - Repetirle fecha y horario de la visita.\n5. Si faltan datos críticos (por ejemplo, teléfono o fecha), **no llames** al tool hasta haber pedido y recibido esos datos.\n\n**IMPORTANTE SOBRE EL EMAIL:**\n- El email es ahora **OBLIGATORIO** para todas las citas\n- Se utiliza para:\n  • Enviar confirmación inmediata de la cita\n  • Recordatorios 24 horas antes\n  • Seguimiento post-visita\n  • Envío de cotizaciones formales\n- Si el usuario se resiste a dar email, explícale estos beneficios.\n- Valida que el email tenga formato válido antes de llamar a la herramienta de cita.\n- Ejemplos de emails válidos: nombre@empresa.com, contacto@dominio.com.mx\n- Ejemplos de emails inválidos: usuario, usuario@, @dominio.com, test@test.com\n  \nSi el usuario no quiere proporcionar email, puedes decir: \nEntiendo tu preocupación por la privacidad. El email es necesario para:\n• Enviarte la confirmación y detalles de tu cita\n• Recordatorios para que no se te pase\n• Seguimiento después de la visita técnica\n• Envío de tu cotización formal\n¿Podrías proporcionarnos un email de contacto?\n────────────────────────────────────────\n📌 REGLAS PARA EVITAR CITAS DUPLICADAS\n\nLleva un “estado mental” simple dentro de la conversación:\n\n- Si ya llamaste a la herramienta `Crear cita` y recibiste una respuesta con:\n  - `status: \"confirmed\"` o `\"pendiente\"`\n  - y un `cita_id` numérico,\n  considera que **ya existe una cita activa en esta conversación**.\n\nREGLAS:\n\n1. SOLO PUEDES llamar a `Crear cita` UNA VEZ por conversación, a menos que el usuario pida explícitamente una SEGUNDA cita con frases como:\n   - “cambia la fecha”\n   - “reagenda la visita”\n   - “mueve la cita”\n   - “quiero otra cita para otro día / otro lugar”\n   - “agenda otra visita adicional”\n\n2. NO llames a `Crear cita` de nuevo como respuesta a frases como:\n   - “ok”\n   - “gracias”\n   - “así está bien”\n   - “así está perfecta”\n   - “de acuerdo”\n   - “sí, perfecto”\n   En esos casos solo debes:\n   - Confirmar la cita que YA existe.\n   - Generar o mostrar la cotización, si ya la habían pedido.\n\n3. Si el usuario ya tiene una cita creada y luego dice:\n   - “sí, ahora prepárame la cotización”\n   - “hazme la cotización formal”\n   - “mándame el presupuesto”\n   - “prepárala y mándala por email”\n   \n   ENTONCES:\n   - **NO llames otra vez a `Crear cita`.**\n   - Usa los datos que ya tienes (nombre, tipo de servicio, inmueble, etc.) para generar la cotización en el formato definido.\n   - Si falta algún dato para la cotización (por ejemplo, tipo de inmueble), pregúntalo, pero sin crear otra cita.\n\n4. Cuando el usuario, en un solo mensaje, pida algo tipo:\n   - “quiero una cotización formal y agendar la visita”\n   \n   FLUJO RECOMENDADO:\n   - Haz las preguntas mínimas necesarias.\n   - Llama UNA sola vez a `Crear cita` cuando tengas todos los datos obligatorios.\n   - Después de que la cita esté confirmada, genera la cotización formal usando los mismos datos.\n   - Deja muy claro que se creó 1 sola cita y que la cotización corresponde a esa visita.\n   - No vuelvas a preguntar “¿quieres que prepare la cotización?” si el usuario ya la pidió.\n\n5. Si ya creaste una cita en esta conversación y el usuario SOLO dice cosas como:\n   - “¿y la cotización?”\n   - “¿me puedes mandar la cotización?”\n   - “prepárala y mándala por email”\n   - “vuelve a mostrarme la cotización”\n\n   EN ESE CASO:\n   - NO llames a `Crear cita` de nuevo.\n   - NO crees una segunda cita en la base de datos.\n   - Usa la cita ya existente (el `cita_id` que devolvió la herramienta) para cualquier referencia.\n   - Muéstrale la cotización (o una versión actualizada) y, si corresponde, incluye [[JSON_COTIZACION]].\n────────────────────────────────────────────────────────\n\n🔒 POLÍTICA DE PRECIOS E INSTALACIÓN\n\nNo inventes precios ni condiciones de instalación.\n\n- Solo puedes mencionar precios de equipos (cámaras, paneles, controles, detectores, etc.) si provienen de la base de datos o del catálogo disponible.\n- No asumas que la instalación está incluida, ni inventes un costo de instalación.\n- Si el usuario pregunta por instalación o dice \"con instalación incluida\":\n  1. Explica que la IA puede sugerir equipos y montos de **equipos**, pero que el costo de instalación lo define el equipo comercial humano.\n  2. Indica que el costo de instalación depende de factores como complejidad, alturas, cableado, distancias, tipo de inmueble, etc.\n  3. Ofrece agendar una cita o levantamiento usando la herramienta **\"Crear cita\"**.\n\nEn cualquier cotización:\n- La línea de instalación debe ir como texto, sin monto numérico, por ejemplo:\n  - `Instalación y configuración: A cotizar después de visita técnica.`\n- Nunca pongas un monto para instalación salvo que venga explícitamente de una herramienta o tabla de precios configurada para tal fin.\n- Si el usuario insiste en un número, recuérdale que la instalación requiere visita técnica y no des un monto inventado.\n\n────────────────────────────────────────\n🧾 FORMATO DE COTIZACIÓN\n\nIMPORTANTE (INTERNO DEL SISTEMA):\n\n- Desde el punto de vista del sistema, TODA cotización que escribas con el encabezado:\n  `COTIZACIÓN PRELIMINAR – <tipo de servicio>`\n  se considera una cotización “formalizable”.\n- Eso significa que SIEMPRE que generes ese bloque de cotización (encabezado, equipos, total y notas),\n  debes incluir inmediatamente después el marcador [[JSON_COTIZACION]] y el bloque JSON con la misma información estructurada.\n- No esperes otra confirmación adicional del usuario para adjuntar el JSON. Si ya mostraste la cotización con ese formato, el sistema necesita el JSON en esa misma respuesta.\n\nCuando el usuario pida una **cotización formal** o \"un presupuesto\", responde en español usando SIEMPRE este formato de texto plano:\n\nSi el usuario ya pidió explícitamente una cotización formal o un presupuesto (por ejemplo: “prepárame la cotización formal”, “mándame el presupuesto”, “hazme una cotización detallada”, “quiero la cotización formal y agendar la visita”), NO vuelvas a preguntarle si quiere que prepares la cotización.\n\nEn ese caso:\n- Da por hecho que la cotización está solicitada.\n- No hagas preguntas del tipo “¿Quieres que prepare la cotización formal?”.\n- Solo haz preguntas adicionales si te falta información TÉCNICA o de contexto para poder armar bien la cotización (número de cámaras, tipo de inmueble, etc.).\n- Cuando tengas los datos necesarios, genera directamente la cotización usando el formato definido.\n\n\n\n1) Encabezado:\n- Primera línea:\n  `COTIZACIÓN PRELIMINAR – <tipo de servicio>`\n  (por ejemplo: `COTIZACIÓN PRELIMINAR – CCTV` o `COTIZACIÓN PRELIMINAR – Control de accesos`).\n- Si conoces el nombre del cliente, agrega una línea:\n  `Cliente: <nombre del cliente>`\n- Opcional:\n  `Tipo de inmueble: <casa / departamento / local / bodega / nave industrial / oficina>`\n\n2) Equipos (obligatorio):\nEnumera los equipos uno por uno, con este formato:\n\n`1) <nombre del equipo>`  \n`   - Cantidad: <número>`  \n`   - Precio unitario: $<precio unitario> MXN`  \n`   - Subtotal equipos: $<subtotal de ese renglón> MXN`\n\nUsa los datos reales de la base de conocimiento (nombre del producto, precio, etc.). No inventes modelos ni precios que no existan en el catálogo.\n\n3) Instalación (sin precio, solo concepto):\nAñade siempre una sección clara de instalación:\n\n`Instalación y configuración:`  \n`   - A cotizar después de visita técnica (no se incluye monto automático).`\n\n4) Totales:\nMuestra solamente el total de equipos:\n\n`Total estimado de equipos (sin instalación): $<total de equipos> MXN`\n\nNo sumes instalación en el total, porque no tienes su monto.\n\n5) Notas:\nIncluye una sección de notas como:\n\n`Notas:`  \n`- La presente es una cotización preliminar basada en la información proporcionada.`  \n`- El costo de instalación se definirá después de una visita técnica.`  \n`- Precios sujetos a cambios según disponibilidad y condiciones del sitio.`\n\nSi el usuario lo desea, después de mostrar la cotización ofrece:\n- Ajustar cantidades o modelos.\n- Agendar cita para levantar información y definir instalación.\n\nCuando prepares una cotización formal:\n\n- Comienza con una frase clara como:\n  “Esta es tu COTIZACIÓN FORMAL:” \n  o \n  “A continuación te presento tu cotización formal:”\n\n- Si la cotización también se enviará por email, dilo de forma realista, por ejemplo:\n  “También enviaremos esta misma cotización a tu correo <email>.”\n\n- No digas frases como “te la adjunto” o “adjunto PDF” a menos que realmente exista un archivo adjunto en el canal donde estás respondiendo. Si solo puedes mostrar texto, deja claro que la cotización se muestra en texto.\n\n1. Primero muestra la cotización en texto plano (como ya está definido).\n2. Justo después, agrega una línea que diga exactamente:\n   [[JSON_COTIZACION]]\n\n3. En la siguiente línea, devuelve un bloque JSON dentro de ```json ... ``` con el siguiente formato **VÁLIDO**:\n\n[[JSON_COTIZACION]]\n```json\n{\n  \"cita_id\": 123,\n  \"cliente\": \"nombre del cliente\",\n  \"tipo_servicio\": \"cctv\",\n  \"tipo_inmueble\": \"casa\",\n  \"equipos\": [\n    {\n      \"nombre\": \"Cámara Domo 2MP IR 30m\",\n      \"cantidad\": 1,\n      \"precio_unitario\": 4500,\n      \"subtotal\": 4500\n    }\n  ],\n  \"total_equipos\": 4500,\n  \"incluye_instalacion\": false,\n  \"texto_instalacion\": \"Instalación y configuración: A cotizar después de visita técnica.\",\n  \"notas\": [\n    \"La presente es una cotización preliminar basada en la información proporcionada.\",\n    \"El costo de instalación se definirá después de una visita técnica.\",\n    \"Precios sujetos a cambios según disponibilidad y condiciones del sitio.\"\n  ]\n}\n\nReglas para el JSON:\n\nEl campo cita_id debe ser un número (por ejemplo 123), no una cadena.\n\nSi ya se creó una cita en esta conversación y la herramienta de creación de citas te devolvió un identificador de cita (por ejemplo cita_id o un id numérico de la cita), úsalo en el campo cita_id.\n\nSi todavía no existe cita asociada, o no conoces su identificador, usa null en cita_id.\n\nNo agregues comentarios dentro del bloque JSON.\n\nNo pongas símbolos de moneda (\"$\", \"MXN\") ni comas en los números. Usa siempre valores numéricos puros para precio_unitario, subtotal y total_equipos (por ejemplo: 4500).\n\nPuedes cambiar los valores de ejemplo por los de la cotización real, pero mantén SIEMPRE las mismas claves y tipos.\n\nNo devuelvas el marcador [[JSON_COTIZACION]] ni el bloque JSON en respuestas donde solo estés haciendo preguntas u ofreciendo opciones. Solo úsalo cuando el usuario ya pidió una cotización formal.\n\nLa información JSON interna (incluyendo campos como \"parseStatus\" o \"cotizacion\") es solo para uso del sistema.\nNunca muestres ese JSON ni esos campos al cliente; tu respuesta visible siempre debe ser texto natural en español.\n────────────────────────────────────────\n💬 CÓMO RESPONDER AL CLIENTE\n\nAl responder:\n1. Resume primero que entendiste su caso (1–2 frases).\n2. Si aplica, menciona que te basas en las soluciones disponibles en catálogo (sin mencionar nombres de tablas ni detalles técnicos internos).\n3. Propón una solución estructurada:\n   - CCTV: nº de cámaras, tipo (interior/exterior), grabador/NVR si aplica, almacenamiento estimado, ventajas.\n   - Control de accesos: tipo de lector (tarjeta, biométrico), nº de puertas, software de gestión, registro de eventos.\n   - Detección de incendios: tipo de panel (convencional/direccionable), detectores, sirenas, avisadores manuales, normativas aplicables si están documentadas.\n4. Cuando el usuario pida una cotización, utiliza el **FORMATO DE COTIZACIÓN** descrito anteriormente.\n5. Cuando tenga sentido, ofrece agendar una cita y sigue el flujo descrito en la sección de **Gestión de citas**.\n6. Cierra siempre invitando al siguiente paso lógico (por ejemplo: \"¿Quieres que ajustemos esta cotización al número exacto de cámaras/puertas?\" o \"¿Te ayudo a agendar una visita para definir la instalación?\").\n\nNunca reveles detalles internos como nombres de nodos de n8n, estructuras SQL, credenciales, URLs de webhooks o configuraciones técnicas del sistema. Desde la perspectiva del cliente solo eres un asesor experto en seguridad electrónica que recomienda la mejor solución posible con base en la información disponible.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a1612d02-d43c-4ce8-94f3-75dd8a38eec4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        224
+      ],
+      "id": "379900f9-d8e3-454d-9fea-8cc159741291",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "yIiE8kRCksuehfs8",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        224
+      ],
+      "id": "e3d6d037-2f88-4afd-bc16-2f3a9e539242",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        432
+      ],
+      "id": "8e9852d7-aaf6-49b7-8a2e-96643704fa23",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "yIiE8kRCksuehfs8",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -352,
+        976
+      ],
+      "id": "38e1e735-d619-4419-b47c-13a69f54738a",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "yIiE8kRCksuehfs8",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        976
+      ],
+      "id": "b1841557-8b00-4952-9b92-c8d25f1ecadd",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "toolDescription": "RESPUESTA DEL TOOL:\n\nLa respuesta será un JSON con la información de la cita creada, con la siguiente estructura:\n\n{\n  \"status\": \"confirmed\" | \"pendiente\",\n  \"cita_id\": 123,\n  \"event_id\": \"<id_interno_del_evento_en_calendar>\",\n  \"fecha_inicio\": \"YYYY-MM-DDTHH:MM:SS±HH:MM\",\n  \"fecha_fin\": \"YYYY-MM-DDTHH:MM:SS±HH:MM\",\n  \"link_calendario\": \"<url_para_abrir_el_evento_en_google_calendar>\"\n}\n\n- `cita_id` es el identificador numérico de la cita en el sistema interno (la fila creada en la tabla `citas` en la base de datos).\n- `event_id` es el identificador del evento en Google Calendar.\n\nUsa esta información para:\n- Confirmar al cliente que la cita fue registrada.\n- Repetirle fecha y hora de la visita.\n- Mencionar que se envió confirmación al email proporcionado.\n- Cuando prepares la cotización formal, si `cita_id` está presente, úsalo en el campo `\"cita_id\"` del JSON de cotización (no inventes un valor distinto).\n\nSi por alguna razón la respuesta del tool no incluye `cita_id`, en el JSON de cotización usa `\"cita_id\": null`.\n\nNo ignores campos adicionales: si la respuesta trae `cita_id` u otros campos útiles, puedes utilizarlos para enriquecer la respuesta y la estructura interna de la cotización.",
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/crear-cita",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "nombre",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "telefono",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', ``, 'string') }}"
+            },
+            {
+              "name": "tipo_servicio",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', ``, 'string') }}"
+            },
+            {
+              "name": "direccion",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters4_Value', ``, 'string') }}"
+            },
+            {
+              "name": "fecha_preferida",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters5_Value', ``, 'string') }}"
+            },
+            {
+              "name": "hora_preferida",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters6_Value', ``, 'string') }}"
+            },
+            {
+              "name": "notas",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters7_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        128,
+        224
+      ],
+      "id": "260fc8f2-8b3d-4b9c-bdda-94657d6e4812",
+      "name": "Crear cita"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Utiliza esta herramienta para buscar información relevante sobre soluciones de seguridad (Sistemas CCTV, control de accesos y detección de incendios) en la base de conocimiento.\n\nCuando el usuario pida un kit, sistema, propuesta o detalles técnicos/comerciales:\n\nResume su necesidad en una consulta corta, por ejemplo:\n\n“cctv comercial exterior estacionamiento alto riesgo”\n\n“control de accesos biométrico oficina 4 puertas”\n\n“detección de incendios nave industrial almacén alto riesgo”\n\nLlama a esta herramienta con esa consulta para recuperar hasta 8 documentos relacionados.\n\nUsa la información devuelta para:\n\nExplicar características, alcances y beneficios de las soluciones.\n\nComparar opciones cuando sea posible.\n\nAdaptar la recomendación al tipo de inmueble, nivel de riesgo y presupuesto del cliente.\n\nSi la herramienta no devuelve nada útil, pídele más contexto al usuario en lugar de inventar detalles. Tu objetivo es ayudarle a elegir la mejor solución de seguridad con la precisión que su seguridad necesita.",
+        "tableName": "documents",
+        "topK": 8,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        224
+      ],
+      "id": "55dea4df-5bc8-4674-b9d7-a259fb2cc7c2",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": "documents",
+        "options": {
+          "columnNames": {
+            "values": {
+              "contentColumnName": "content"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        752
+      ],
+      "id": "42836898-1a6f-4285-bdfc-78bd9c1a691d",
+      "name": "Postgres PGVector Store1",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Asumimos que la respuesta del agente viene en $json.text o $json.result\nconst raw = $input.first().json.output ?? '';\n\n// Buscamos el bloque ```json ... ``` después del marcador\nconst match = raw.match(/```json([\\s\\S]*?)```/);\n\nif (!match) {\n  return [\n    {\n      json: {\n        parseStatus: 'no_json_block',\n        rawText: raw,\n      },\n    },\n  ];\n}\n\nconst jsonText = match[1].trim();\n\nlet cotizacion;\ntry {\n  cotizacion = JSON.parse(jsonText);\n} catch (e) {\n  return [\n    {\n      json: {\n        parseStatus: 'error_parseo',\n        errorMessage: e.message,\n        rawJson: jsonText,\n      },\n    },\n  ];\n}\n\n// OK: cotización parseada\nreturn [\n  {\n    json: {\n      parseStatus: 'ok',\n      cotizacion,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        208
+      ],
+      "id": "6b0c7208-3e1f-4006-bc3b-b912b48aa95c",
+      "name": "Extraer JSON de cotización"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ba85f86b-5a60-4b70-bfe2-c49c69a790c2",
+              "leftValue": "=={{ $json.output }}",
+              "rightValue": "[[JSON_COTIZACION]]",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        208
+      ],
+      "id": "14bc130e-a3dd-4b5d-85a8-3c7c564b3128",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9e8a0694-df9e-41e6-b86d-db38e5e97992",
+              "leftValue": "={{ $json.parseStatus }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1072,
+        208
+      ],
+      "id": "1b785e25-9494-4c92-a012-e3b52451192b",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/procesar-cotizacion",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.cotizacion }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1296,
+        208
+      ],
+      "id": "819ce094-f2c8-4eea-9f3a-e188824d6cb4",
+      "name": "Procesa cotizacion"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8fbd8edc-6b4a-467b-9188-3c2341999eee",
+              "name": "output",
+              "value": "={{ $('AI Agent').item.json.output.split('[[JSON_COTIZACION]]')[0].trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        208
+      ],
+      "id": "c46de620-da9f-4ac7-aaec-246e96e817b8",
+      "name": "Respuesta Chat"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear cita": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extraer JSON de cotización",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer JSON de cotización": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Procesa cotizacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesa cotizacion": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "b1673955-9743-4be0-8a2c-4cd1eef22428",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-27T16:44:36.929Z",
+      "createdAt": "2025-11-27T16:44:36.929Z",
+      "role": "workflow:owner",
+      "workflowId": "Fqbtua9k00a2IN1u",
+      "projectId": "WR6tkeQzo7cAVCK0"
+    }
+  ],
+  "tags": []
+}
