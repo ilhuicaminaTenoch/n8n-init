@@ -1,0 +1,284 @@
+{
+  "updatedAt": "2025-12-02T22:26:28.291Z",
+  "createdAt": "2025-12-02T18:06:01.814Z",
+  "id": "xSiEu3Oaog5E0raR",
+  "name": "Sincroniza productos SYSCOM",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        272
+      ],
+      "id": "ff53e006-da12-4032-90fc-470aaa2b6ef7",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  last_download_at,\n  CASE\n    WHEN last_download_at IS NULL THEN true\n    ELSE (NOW() - last_download_at) >= interval '1 hour'\n  END AS can_run\nFROM sync_state\nWHERE id = 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -208,
+        272
+      ],
+      "id": "3b704f69-4faf-48e1-b69b-60c6aabe06a9",
+      "name": "CheckThrottle",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "df8f26bc-c2fb-438e-a4f0-8780181dc611",
+              "leftValue": "={{ $json.can_run }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        272
+      ],
+      "id": "cafce088-423c-45f4-8fe0-253688c1abc3",
+      "name": "Ya paso una hora ?"
+    },
+    {
+      "parameters": {
+        "url": "http://www.syscom.mx/principal/reporte_art_hora?cadena1=104555677&cadena2=67332897c6c19f9331adb2afa4c4377e&all=1&cadena3=1&alm=1&img=1&obs=1&tc=1&ctg=8&lnk=1&idc=1&idp=1&clear=1&sel=0",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        240,
+        96
+      ],
+      "id": "b5e8ca7a-af69-476a-b159-584b99ca6784",
+      "name": "Descarga csv products"
+    },
+    {
+      "parameters": {
+        "options": {
+          "delimiter": ",",
+          "encoding": "utf-8",
+          "headerRow": true,
+          "includeEmptyCells": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        272
+      ],
+      "id": "92f89435-bf7f-45cd-b52d-5bdceb3170e1",
+      "name": "Parsear csv"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/files/ProductosHora.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        48
+      ],
+      "id": "a33e017c-af1a-416b-9acf-9e87d4347e74",
+      "name": "Descarga csv",
+      "retryOnFail": true,
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO products (\n  external_id,\n  model,\n  brand,\n  title,\n  list_price,\n  special_price,\n  customer_price,\n  exchange_rate,\n  stock_cedis_mn,\n  tax_code,\n  weight_kg,\n  image_url,\n  link_public,\n  link_private,\n  menu_lvl_1,\n  menu_lvl_2,\n  menu_lvl_3,\n  menu_id_1,\n  menu_id_2,\n  menu_id_3,\n  last_seen_at,\n  is_active\n) VALUES (\n  {{ $json[\"ID Producto\"] || 0 }},\n  '{{ ($json[\"Modelo\"] || \"\").replace(/'/g, \"''\") }}',\n  {{ $json[\"Marca\"] ? `'${$json[\"Marca\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  '{{ ($json[\"Título\"] || \"\").replace(/'/g, \"''\") }}',\n\n  {{ $json[\"Precio Lista\"] || 0 }},\n  {{ $json[\"Precio Especial\"] || 0 }},\n  {{ $json[\"Su Precio\"] || 0 }},\n  {{ $json[\"Tipo de Cambio\"] || 0 }},\n\n  {{ $json[\"México Norte\"] || 0 }},\n\n  '{{ ($json[\"Código Fiscal\"] || \"\").replace(/'/g, \"''\") }}',\n  {{ $json[\"Peso Kg\"] || 0 }},\n\n  '{{ ($json[\"Imagen Principal\"] || \"\").replace(/'/g, \"''\") }}',\n  '{{ ($json[\"Link SYSCOM\"] || \"\").replace(/'/g, \"''\") }}',\n  '{{ ($json[\"Link Privado\"] || \"\").replace(/'/g, \"''\") }}',\n\n  '{{ ($json[\"Menu Nvl 1\"] || \"\").replace(/'/g, \"''\") }}',\n  '{{ ($json[\"Menu Nvl 2\"] || \"\").replace(/'/g, \"''\") }}',\n  '{{ ($json[\"Menu Nvl 3\"] || \"\").replace(/'/g, \"''\") }}',\n\n  {{ $json[\"ID Menu Nvl 1\"] || 0 }},\n  {{ $json[\"ID Menu Nvl 2\"] || 0 }},\n  {{ $json[\"ID Menu Nvl 3\"] || 0 }},\n\n  now(),\n  {{ $json[\"México Norte\"] > 0 ? 'true' : 'false' }}\n)\nON CONFLICT (external_id)\nDO UPDATE SET\n  model          = EXCLUDED.model,\n  brand          = EXCLUDED.brand,\n  title          = EXCLUDED.title,\n  list_price     = EXCLUDED.list_price,\n  special_price  = EXCLUDED.special_price,\n  customer_price = EXCLUDED.customer_price,\n  exchange_rate  = EXCLUDED.exchange_rate,\n  stock_cedis_mn = EXCLUDED.stock_cedis_mn,\n  tax_code       = EXCLUDED.tax_code,\n  weight_kg      = EXCLUDED.weight_kg,\n  image_url      = EXCLUDED.image_url,\n  link_public    = EXCLUDED.link_public,\n  link_private   = EXCLUDED.link_private,\n  menu_lvl_1     = EXCLUDED.menu_lvl_1,\n  menu_lvl_2     = EXCLUDED.menu_lvl_2,\n  menu_lvl_3     = EXCLUDED.menu_lvl_3,\n  menu_id_1      = EXCLUDED.menu_id_1,\n  menu_id_2      = EXCLUDED.menu_id_2,\n  menu_id_3      = EXCLUDED.menu_id_3,\n  last_seen_at   = now(),\n  is_active      = (EXCLUDED.stock_cedis_mn > 0);\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        688,
+        272
+      ],
+      "id": "8d76133d-8fe4-4a2e-9100-9b1dadf80026",
+      "name": "Upsert productos",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE sync_state\nSET last_download_at = now()\nWHERE id = 1;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        912,
+        272
+      ],
+      "id": "c6a8c636-0459-4ae8-9bf1-e7fc981aa70b",
+      "name": "Actualiza sync_state",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "CheckThrottle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CheckThrottle": {
+      "main": [
+        [
+          {
+            "node": "Ya paso una hora ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ya paso una hora ?": {
+      "main": [
+        [
+          {
+            "node": "Descarga csv products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descarga csv products": {
+      "main": [
+        [
+          {
+            "node": "Parsear csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descarga csv": {
+      "main": [
+        []
+      ]
+    },
+    "Parsear csv": {
+      "main": [
+        [
+          {
+            "node": "Upsert productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert productos": {
+      "main": [
+        [
+          {
+            "node": "Actualiza sync_state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "6a120850-92b7-4f91-ba57-8392605d0c0a",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-02T18:06:01.814Z",
+      "createdAt": "2025-12-02T18:06:01.814Z",
+      "role": "workflow:owner",
+      "workflowId": "xSiEu3Oaog5E0raR",
+      "projectId": "WR6tkeQzo7cAVCK0"
+    }
+  ],
+  "tags": []
+}
