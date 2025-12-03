@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2025-12-02T22:26:28.291Z",
+  "updatedAt": "2025-12-03T00:54:53.817Z",
   "createdAt": "2025-12-02T18:06:01.814Z",
   "id": "xSiEu3Oaog5E0raR",
   "name": "Sincroniza productos SYSCOM",
-  "active": true,
+  "active": false,
   "isArchived": false,
   "nodes": [
     {
@@ -20,76 +20,57 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -432,
-        272
+        -384,
+        544
       ],
       "id": "ff53e006-da12-4032-90fc-470aaa2b6ef7",
       "name": "Schedule Trigger"
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT\n  last_download_at,\n  CASE\n    WHEN last_download_at IS NULL THEN true\n    ELSE (NOW() - last_download_at) >= interval '1 hour'\n  END AS can_run\nFROM sync_state\nWHERE id = 1;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -208,
-        272
-      ],
-      "id": "3b704f69-4faf-48e1-b69b-60c6aabe06a9",
-      "name": "CheckThrottle",
-      "credentials": {
-        "postgres": {
-          "id": "U1gk6gNtS2AfXBnb",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
+        "url": "={{ $env.SYSCOM_BASE_URL }}/productos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
             {
-              "id": "df8f26bc-c2fb-438e-a4f0-8780181dc611",
-              "leftValue": "={{ $json.can_run }}",
-              "rightValue": false,
-              "operator": {
-                "type": "boolean",
-                "operation": "true",
-                "singleValue": true
-              }
+              "name": "categoria",
+              "value": "={{ $env.SYSCOM_CATEGORIAS }}"
+            },
+            {
+              "name": "marca",
+              "value": "syscom"
+            },
+            {
+              "name": "busqueda",
+              "value": "camaras"
+            },
+            {
+              "name": "sucursal",
+              "value": "={{ $env.SYSCOM_SUCURSAL_MN }}"
+            },
+            {
+              "name": "pagina",
+              "value": "1"
             }
-          ],
-          "combinator": "and"
+          ]
         },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        16,
-        272
-      ],
-      "id": "cafce088-423c-45f4-8fe0-253688c1abc3",
-      "name": "Ya paso una hora ?"
-    },
-    {
-      "parameters": {
-        "url": "http://www.syscom.mx/principal/reporte_art_hora?cadena1=104555677&cadena2=67332897c6c19f9331adb2afa4c4377e&all=1&cadena3=1&alm=1&img=1&obs=1&tc=1&ctg=8&lnk=1&idc=1&idp=1&clear=1&sel=0",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SYSCOM_TOKEN }}"
+            }
+          ]
+        },
         "options": {
-          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {}
+          },
           "response": {
             "response": {
               "fullResponse": true,
-              "responseFormat": "file"
+              "responseFormat": "json"
             }
           }
         }
@@ -97,83 +78,108 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        240,
-        96
+        -160,
+        544
       ],
-      "id": "b5e8ca7a-af69-476a-b159-584b99ca6784",
-      "name": "Descarga csv products"
+      "id": "727feaae-d942-4f3b-a460-cac9ec734ec9",
+      "name": "HTTP - Productos página 1"
     },
     {
       "parameters": {
+        "jsCode": "const totalPages =  $input.first().json.body.paginas || 1;\nconst items = [];\n\nfor (let p = 1; p <= totalPages; p++) {\n  items.push({\n    json: {\n      pagina: p\n    }\n  });\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        544
+      ],
+      "id": "4e9e5e8c-3a4f-46d5-a3b9-3e636e1b5405",
+      "name": "Fn -Generar páginas"
+    },
+    {
+      "parameters": {
+        "url": "https://developers.syscom.mx/api/v1/productos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "categoria",
+              "value": "={{ $env.SYSCOM_CATEGORIAS }}"
+            },
+            {
+              "name": "marca",
+              "value": "syscom"
+            },
+            {
+              "name": "busqueda",
+              "value": "camaras"
+            },
+            {
+              "name": "sucursal",
+              "value": "={{ $env.SYSCOM_SUCURSAL_MN }}"
+            },
+            {
+              "name": "stock",
+              "value": "1"
+            },
+            {
+              "name": "pagina",
+              "value": "={{ $json.pagina }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjcyOTgyY2NhZWExMmIyYmQ1NDc4OGZiN2U2Mjg4NjdjZjRiNjRmNjVhZDYwNTA2NzBmZDQ1N2FhMjA3ZjdkNzE4YWE3MjllZWNkYjdiOWJjIn0.eyJhdWQiOiJsNTJCT0dOMzg3UTcxTEFET0o4RmxOa0VoY1dNYmY1WSIsImp0aSI6IjcyOTgyY2NhZWExMmIyYmQ1NDc4OGZiN2U2Mjg4NjdjZjRiNjRmNjVhZDYwNTA2NzBmZDQ1N2FhMjA3ZjdkNzE4YWE3MjllZWNkYjdiOWJjIiwiaWF0IjoxNzY0NzE4NTI2LCJuYmYiOjE3NjQ3MTg1MjYsImV4cCI6MTc5NjI1NDUyNiwic3ViIjoiIiwic2NvcGVzIjpbXX0.o-BTv11_vj3pzDG8zxoOpGPQo3-Ce-hr8CjwntpxlvztQbhhgwkvjsUHsuEQ43OHpkn1jNbZ5_R6V3rzf0fj1yjZ5jP9LO2S0nemF-h2753vESpmKNfs3GTTzVKzJy4uyMrAcBa7k2Yn_Y6RiBZI61p4e2kDbxQn6ppqoqy7z7ZrcIwkBz9eMs8Nvn56XU9beIlTPDjd-Ztrqu15CoUje0un9-4utpswy0R2933c2fJyuU_HvMghqqv6Kn-gbq-vv5b0yDNr7Dk8xwTPUf4zXzuAzWNO7gEp67QJLlUVYaJIvulcJ7gX3WFNKQr4AZrIXvyh8nc8pSDgTaDsnOPBux_Tk1cL2-8uyYVItz9R913rettE380yuQPZToeB5t-0Dcyz-JgRhL0swjmIdGIvGpBF6F2GE9mqugLwknpkCElpQKjO2Ew7kSbSkeQbgJ5WNGruVfODqUQDU1E0C-hmdRwI8ruMaleKQKZM4_rtztIo9FFOqpzN0a5joDODxpY8-tGY51QVh6ujnSkErZ6tnz5cuic0ok7QbtYYhiyBs-Apttpl2k-XL9sra3eEUIccbuRfyS-xZUbR-A3CqoD4bOSbiaeLzxeTCi1JpPIY1TzzOXqttIk2uA8cGYk2SSJnxB-oOvBP-KISyz2_EVvuQpvViHQoNLl_NisFIOZpKgU"
+            }
+          ]
+        },
         "options": {
-          "delimiter": ",",
-          "encoding": "utf-8",
-          "headerRow": true,
-          "includeEmptyCells": true
+          "redirect": {
+            "redirect": {}
+          }
         }
       },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
       "position": [
-        464,
-        272
+        288,
+        544
       ],
-      "id": "92f89435-bf7f-45cd-b52d-5bdceb3170e1",
-      "name": "Parsear csv"
+      "id": "b957e19e-e80a-4200-87bf-7126a9265897",
+      "name": "HTTP - Productos por pagina"
     },
     {
       "parameters": {
-        "fileSelector": "/files/ProductosHora.csv",
-        "options": {}
+        "jsCode": "const output = [];\n\nfor (const page of items) {\n  const productos = page.json.productos || [];\n  for (const p of productos) {\n    const cats = p.categorias || [];\n    const lvl1 = cats.find(c => c.nivel === 1) || {};\n    const lvl2 = cats.find(c => c.nivel === 2) || {};\n    const lvl3 = cats.find(c => c.nivel === 3) || {};\n\n    const stock =\n      (p.existencia && typeof p.existencia.nuevo !== 'undefined')\n        ? p.existencia.nuevo\n        : (p.total_existencia || 0);\n\n    output.push({\n      json: {\n        external_id: parseInt(p.producto_id, 10),\n        model: p.modelo,\n        brand: p.marca || null,\n        title: p.titulo,\n\n        list_price: p.precios?.precio_lista || 0,\n        special_price: p.precios?.precio_especial || 0,\n        customer_price: p.precios?.precio_descuento || 0,\n        exchange_rate: 0,\n        currency: 'MXN',\n\n        stock_cedis_mn: stock,\n        tax_code: p.sat_key || null,\n        weight_kg: p.peso || 0,\n\n        image_url: p.img_portada || null,\n        link_public: p.link ? `https://www.syscom.mx${p.link}` : null,\n        link_private: p.link_privado || null,\n\n        menu_lvl_1: lvl1.nombre || null,\n        menu_lvl_2: lvl2.nombre || null,\n        menu_lvl_3: lvl3.nombre || null,\n        menu_id_1: lvl1.id ? parseInt(lvl1.id, 10) : null,\n        menu_id_2: lvl2.id ? parseInt(lvl2.id, 10) : null,\n        menu_id_3: lvl3.id ? parseInt(lvl3.id, 10) : null\n      }\n    });\n  }\n}\n\nreturn output;\n"
       },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        -432,
-        48
+        512,
+        544
       ],
-      "id": "a33e017c-af1a-416b-9acf-9e87d4347e74",
-      "name": "Descarga csv",
-      "retryOnFail": true,
-      "executeOnce": true,
-      "alwaysOutputData": true,
-      "disabled": true
+      "id": "d82bc5a6-bfb8-4804-a298-27ae26fb57f5",
+      "name": "Fn - Mapear productos a tabla"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO products (\n  external_id,\n  model,\n  brand,\n  title,\n  list_price,\n  special_price,\n  customer_price,\n  exchange_rate,\n  stock_cedis_mn,\n  tax_code,\n  weight_kg,\n  image_url,\n  link_public,\n  link_private,\n  menu_lvl_1,\n  menu_lvl_2,\n  menu_lvl_3,\n  menu_id_1,\n  menu_id_2,\n  menu_id_3,\n  last_seen_at,\n  is_active\n) VALUES (\n  {{ $json[\"ID Producto\"] || 0 }},\n  '{{ ($json[\"Modelo\"] || \"\").replace(/'/g, \"''\") }}',\n  {{ $json[\"Marca\"] ? `'${$json[\"Marca\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  '{{ ($json[\"Título\"] || \"\").replace(/'/g, \"''\") }}',\n\n  {{ $json[\"Precio Lista\"] || 0 }},\n  {{ $json[\"Precio Especial\"] || 0 }},\n  {{ $json[\"Su Precio\"] || 0 }},\n  {{ $json[\"Tipo de Cambio\"] || 0 }},\n\n  {{ $json[\"México Norte\"] || 0 }},\n\n  '{{ ($json[\"Código Fiscal\"] || \"\").replace(/'/g, \"''\") }}',\n  {{ $json[\"Peso Kg\"] || 0 }},\n\n  '{{ ($json[\"Imagen Principal\"] || \"\").replace(/'/g, \"''\") }}',\n  '{{ ($json[\"Link SYSCOM\"] || \"\").replace(/'/g, \"''\") }}',\n  '{{ ($json[\"Link Privado\"] || \"\").replace(/'/g, \"''\") }}',\n\n  '{{ ($json[\"Menu Nvl 1\"] || \"\").replace(/'/g, \"''\") }}',\n  '{{ ($json[\"Menu Nvl 2\"] || \"\").replace(/'/g, \"''\") }}',\n  '{{ ($json[\"Menu Nvl 3\"] || \"\").replace(/'/g, \"''\") }}',\n\n  {{ $json[\"ID Menu Nvl 1\"] || 0 }},\n  {{ $json[\"ID Menu Nvl 2\"] || 0 }},\n  {{ $json[\"ID Menu Nvl 3\"] || 0 }},\n\n  now(),\n  {{ $json[\"México Norte\"] > 0 ? 'true' : 'false' }}\n)\nON CONFLICT (external_id)\nDO UPDATE SET\n  model          = EXCLUDED.model,\n  brand          = EXCLUDED.brand,\n  title          = EXCLUDED.title,\n  list_price     = EXCLUDED.list_price,\n  special_price  = EXCLUDED.special_price,\n  customer_price = EXCLUDED.customer_price,\n  exchange_rate  = EXCLUDED.exchange_rate,\n  stock_cedis_mn = EXCLUDED.stock_cedis_mn,\n  tax_code       = EXCLUDED.tax_code,\n  weight_kg      = EXCLUDED.weight_kg,\n  image_url      = EXCLUDED.image_url,\n  link_public    = EXCLUDED.link_public,\n  link_private   = EXCLUDED.link_private,\n  menu_lvl_1     = EXCLUDED.menu_lvl_1,\n  menu_lvl_2     = EXCLUDED.menu_lvl_2,\n  menu_lvl_3     = EXCLUDED.menu_lvl_3,\n  menu_id_1      = EXCLUDED.menu_id_1,\n  menu_id_2      = EXCLUDED.menu_id_2,\n  menu_id_3      = EXCLUDED.menu_id_3,\n  last_seen_at   = now(),\n  is_active      = (EXCLUDED.stock_cedis_mn > 0);\n",
+        "query": "INSERT INTO products (\n  external_id,\n  model,\n  brand,\n  title,\n  list_price,\n  special_price,\n  customer_price,\n  exchange_rate,\n  stock_cedis_mn,\n  tax_code,\n  weight_kg,\n  image_url,\n  link_public,\n  link_private,\n  menu_lvl_1,\n  menu_lvl_2,\n  menu_lvl_3,\n  menu_id_1,\n  menu_id_2,\n  menu_id_3,\n  last_seen_at,\n  is_active\n) VALUES (\n  {{ $json[\"external_id\"] }},\n  '{{ $json[\"model\"].replace(/'/g, \"''\") }}',\n  {{ $json[\"brand\"] ? `'${$json[\"brand\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  '{{ $json[\"title\"].replace(/'/g, \"''\") }}',\n\n  {{ $json[\"list_price\"] || 0 }},\n  {{ $json[\"special_price\"] || 0 }},\n  {{ $json[\"customer_price\"] || 0 }},\n  {{ $json[\"exchange_rate\"] || 0 }},\n\n  {{ $json[\"stock_cedis_mn\"] || 0 }},\n  {{ $json[\"tax_code\"] ? `'${$json[\"tax_code\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  {{ $json[\"weight_kg\"] || 0 }},\n\n  {{ $json[\"image_url\"] ? `'${$json[\"image_url\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  {{ $json[\"link_public\"] ? `'${$json[\"link_public\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  {{ $json[\"link_private\"] ? `'${$json[\"link_private\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n\n  {{ $json[\"menu_lvl_1\"] ? `'${$json[\"menu_lvl_1\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  {{ $json[\"menu_lvl_2\"] ? `'${$json[\"menu_lvl_2\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  {{ $json[\"menu_lvl_3\"] ? `'${$json[\"menu_lvl_3\"].replace(/'/g, \"''\")}'` : 'NULL' }},\n  {{ $json[\"menu_id_1\"] ?? 'NULL' }},\n  {{ $json[\"menu_id_2\"] ?? 'NULL' }},\n  {{ $json[\"menu_id_3\"] ?? 'NULL' }},\n\n  now(),\n  {{ $json[\"stock_cedis_mn\"] > 0 ? 'true' : 'false' }}\n)\nON CONFLICT (external_id)\nDO UPDATE SET\n  model          = EXCLUDED.model,\n  brand          = EXCLUDED.brand,\n  title          = EXCLUDED.title,\n  list_price     = EXCLUDED.list_price,\n  special_price  = EXCLUDED.special_price,\n  customer_price = EXCLUDED.customer_price,\n  exchange_rate  = EXCLUDED.exchange_rate,\n  stock_cedis_mn = EXCLUDED.stock_cedis_mn,\n  tax_code       = EXCLUDED.tax_code,\n  weight_kg      = EXCLUDED.weight_kg,\n  image_url      = EXCLUDED.image_url,\n  link_public    = EXCLUDED.link_public,\n  link_private   = EXCLUDED.link_private,\n  menu_lvl_1     = EXCLUDED.menu_lvl_1,\n  menu_lvl_2     = EXCLUDED.menu_lvl_2,\n  menu_lvl_3     = EXCLUDED.menu_lvl_3,\n  menu_id_1      = EXCLUDED.menu_id_1,\n  menu_id_2      = EXCLUDED.menu_id_2,\n  menu_id_3      = EXCLUDED.menu_id_3,\n  last_seen_at   = now(),\n  is_active      = (EXCLUDED.stock_cedis_mn > 0);\n",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        688,
-        272
+        736,
+        544
       ],
-      "id": "8d76133d-8fe4-4a2e-9100-9b1dadf80026",
-      "name": "Upsert productos",
-      "credentials": {
-        "postgres": {
-          "id": "U1gk6gNtS2AfXBnb",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE sync_state\nSET last_download_at = now()\nWHERE id = 1;\n",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        912,
-        272
-      ],
-      "id": "c6a8c636-0459-4ae8-9bf1-e7fc981aa70b",
-      "name": "Actualiza sync_state",
+      "id": "b1a0206c-9f80-496b-9934-c050d4e065b7",
+      "name": "Postgres - Upsert a productos",
       "credentials": {
         "postgres": {
           "id": "U1gk6gNtS2AfXBnb",
@@ -187,67 +193,51 @@
       "main": [
         [
           {
-            "node": "CheckThrottle",
+            "node": "HTTP - Productos página 1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "CheckThrottle": {
+    "HTTP - Productos página 1": {
       "main": [
         [
           {
-            "node": "Ya paso una hora ?",
+            "node": "Fn -Generar páginas",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Ya paso una hora ?": {
+    "Fn -Generar páginas": {
       "main": [
         [
           {
-            "node": "Descarga csv products",
+            "node": "HTTP - Productos por pagina",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Descarga csv products": {
+    "HTTP - Productos por pagina": {
       "main": [
         [
           {
-            "node": "Parsear csv",
+            "node": "Fn - Mapear productos a tabla",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Descarga csv": {
-      "main": [
-        []
-      ]
-    },
-    "Parsear csv": {
+    "Fn - Mapear productos a tabla": {
       "main": [
         [
           {
-            "node": "Upsert productos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Upsert productos": {
-      "main": [
-        [
-          {
-            "node": "Actualiza sync_state",
+            "node": "Postgres - Upsert a productos",
             "type": "main",
             "index": 0
           }
@@ -269,7 +259,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "6a120850-92b7-4f91-ba57-8392605d0c0a",
+  "versionId": "ae1e6755-ad92-4909-8ead-024ccf5fe1e6",
   "triggerCount": 1,
   "shared": [
     {
