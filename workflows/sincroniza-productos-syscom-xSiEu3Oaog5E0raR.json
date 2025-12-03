@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-03T22:56:54.224Z",
+  "updatedAt": "2025-12-03T23:34:41.325Z",
   "createdAt": "2025-12-02T18:06:01.814Z",
   "id": "xSiEu3Oaog5E0raR",
   "name": "Sincroniza productos SYSCOM",
@@ -60,11 +60,6 @@
           ]
         },
         "options": {
-          "batching": {
-            "batch": {
-              "batchSize": 1
-            }
-          },
           "response": {
             "response": {
               "responseFormat": "json"
@@ -92,7 +87,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        -160,
+        256,
         768
       ],
       "id": "727feaae-d942-4f3b-a460-cac9ec734ec9",
@@ -105,7 +100,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        64,
+        480,
         768
       ],
       "id": "d82bc5a6-bfb8-4804-a298-27ae26fb57f5",
@@ -119,7 +114,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        288,
+        704,
         768
       ],
       "id": "e30aad45-c8e7-406e-a661-295d33ad5682",
@@ -134,7 +129,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        512,
+        928,
         624
       ],
       "id": "a8ba626c-9c4b-42db-aaf7-7a55191718f7",
@@ -155,7 +150,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        496,
+        912,
         864
       ],
       "id": "09f38471-1873-45cf-b69b-b4a0d05b4374",
@@ -166,6 +161,61 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  last_download_at,\n  (NOW() - last_download_at) >= interval '1 hour' AS can_run\nFROM sync_state\nLIMIT 1;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -176,
+        768
+      ],
+      "id": "ef38b26e-c376-4ef7-bd45-21fce84fbebb",
+      "name": "¿Ya paso una hora?",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "964cd57d-5751-4385-b948-46ce4f61d930",
+              "leftValue": "={{ $json.can_run }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        768
+      ],
+      "id": "ed5747b2-f9ac-4b98-863c-db5c3bbd7b72",
+      "name": "If"
     }
   ],
   "connections": {
@@ -173,7 +223,7 @@
       "main": [
         [
           {
-            "node": "HTTP - Productos página 1",
+            "node": "¿Ya paso una hora?",
             "type": "main",
             "index": 0
           }
@@ -230,6 +280,28 @@
           }
         ]
       ]
+    },
+    "¿Ya paso una hora?": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Productos página 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -246,7 +318,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "648fec63-e744-430e-a332-47cb7c0c0240",
+  "versionId": "6029491a-2472-4e96-baf8-79faf0f465df",
   "triggerCount": 1,
   "shared": [
     {
