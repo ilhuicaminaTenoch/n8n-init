@@ -1,0 +1,438 @@
+{
+  "updatedAt": "2025-12-07T18:30:02.724Z",
+  "createdAt": "2025-11-27T16:44:00.314Z",
+  "id": "MZAL3sZpPmF50KLN",
+  "name": "Procesar Cotización",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/procesar-cotizacion",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "207e0e27-e8ca-4b41-8072-9ead87907a35",
+      "name": "Webhook Cotización",
+      "webhookId": "procesar-cotizacion-webhook"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "cotizaciones",
+          "mode": "list",
+          "cachedResultName": "cotizaciones"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "cita_id": "={{ $json.body.cita_id }}",
+            "texto_completo": "={{ $json.body.texto_instalacion }}",
+            "total_equipos": "={{ $json.body.total_equipos }}",
+            "estado": "pendiente",
+            "created_at": "2025-11-23T15:10:31"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "cita_id",
+              "displayName": "cita_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "texto_completo",
+              "displayName": "texto_completo",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_equipos",
+              "displayName": "total_equipos",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "outputColumns": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "07143ad3-f2cf-49f9-ab67-63e710a64753",
+      "name": "Insertar Cotización Principal",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cotizacionId = $input.first().json.id;\nconst equipos = $('Webhook Cotización').first().json.body.equipos || [];\nconst notasArray = $('Webhook Cotización').first().json.body.notas || [];\nconst notasTexto = notasArray.join('|');\n\nreturn equipos.map((eq) => ({\n  json: {\n    cotizacion_id: cotizacionId,\n    nombre_producto: eq.nombre,\n    cantidad: eq.cantidad,\n    precio_unitario: eq.precio_unitario,\n    subtotal: eq.subtotal,\n    notas: notasTexto || null,\n  },\n}));\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "da2f31b5-d57b-4dcd-83b1-aeb046355c85",
+      "name": "Preparar Productos"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "productos_cotizados",
+          "mode": "list",
+          "cachedResultName": "productos_cotizados"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "cotizacion_id": "={{ $json.cotizacion_id }}",
+            "nombre_producto": "={{ $json.nombre_producto }}",
+            "cantidad": "={{ $json.cantidad }}",
+            "precio_unitario": "={{ $json.precio_unitario }}",
+            "subtotal": "={{ $json.subtotal }}",
+            "notas": "={{ $json.notas }}",
+            "created_at": "2025-11-25T16:40:35"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "cotizacion_id",
+              "displayName": "cotizacion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_producto",
+              "displayName": "nombre_producto",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad",
+              "displayName": "cantidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "precio_unitario",
+              "displayName": "precio_unitario",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "subtotal",
+              "displayName": "subtotal",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notas",
+              "displayName": "notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "outputColumns": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        672,
+        -16
+      ],
+      "id": "8bce474d-b033-4568-8263-fa405638d7c8",
+      "name": "Insertar Productos",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        -16
+      ],
+      "id": "22010039-4c4d-4e7a-a5b4-7d4011628577",
+      "name": "Fin Cotización"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select\n    c.id cita_id,\n    c.nombre_cliente nombre,\n    c.telefono,\n    c.email,\n    c.direccion,\n    c.tipo_servicio,\n    c.fecha_entrega fecha,\n    c.hora_inicio,\n    c.hora_fin,\n    c.notas\n    from citas c\nwhere c.id = $1",
+        "options": {
+          "queryReplacement": "={{ $('Insertar Cotización Principal').item.json.cita_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "bce36a56-2464-4dcb-81ce-2c07e5614f2b",
+      "name": "Obtiene cliente",
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cliente = $input.first().json;\nconst origen = $('Webhook Cotización').first().json.body;\nconst productosCotizados = $('Webhook Cotización').first().json.body.equipos\n\nconst payload = {\n  cita_id: cliente.cita_id ?? origen.cita_id ?? null,\n  nombre_cliente: cliente.nombre,\n  telefono: cliente.telefono,\n  email: cliente.email,\n  direccion: cliente.direccion,\n  tipo_servicio: cliente.tipo_servicio,\n  fecha_entrega: cliente.fecha,\n  hora_inicio: cliente.hora_inicio,\n  hora_fin: cliente.hora_fin,\n  notas: cliente.notas || origen.notas || null,\n  cotizacion_texto: origen.cotizacion_texto,\n  total_equipos: origen.total_equipos,\n  productos_cotizados: productosCotizados || []\n};\n\nreturn [{ json: payload }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -16
+      ],
+      "id": "5455a367-7eb8-4f3c-8f67-1baf169d3ebe",
+      "name": "Prepara datos email tecnico"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/email-tecnico-cotizacion",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $input.item.json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1328,
+        -16
+      ],
+      "id": "76bfbe2a-c99b-4585-b07c-886ead631241",
+      "name": "HTTP Request"
+    }
+  ],
+  "connections": {
+    "Webhook Cotización": {
+      "main": [
+        [
+          {
+            "node": "Insertar Cotización Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar Cotización Principal": {
+      "main": [
+        [
+          {
+            "node": "Preparar Productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Productos": {
+      "main": [
+        [
+          {
+            "node": "Insertar Productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar Productos": {
+      "main": [
+        [
+          {
+            "node": "Obtiene cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtiene cliente": {
+      "main": [
+        [
+          {
+            "node": "Prepara datos email tecnico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara datos email tecnico": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Fin Cotización",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "fd018495-f17c-46a0-acb6-7f93d8bf1af3",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-27T16:44:00.314Z",
+      "createdAt": "2025-11-27T16:44:00.314Z",
+      "role": "workflow:owner",
+      "workflowId": "MZAL3sZpPmF50KLN",
+      "projectId": "WR6tkeQzo7cAVCK0"
+    }
+  ],
+  "tags": []
+}
