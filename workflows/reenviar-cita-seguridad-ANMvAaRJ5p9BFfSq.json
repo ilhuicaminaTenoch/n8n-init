@@ -1,0 +1,233 @@
+{
+  "updatedAt": "2025-11-28T23:04:45.533Z",
+  "createdAt": "2025-11-28T23:02:31.828Z",
+  "id": "ANMvAaRJ5p9BFfSq",
+  "name": "Reenviar Cita Seguridad",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "reenviar-cita",
+        "responseMode": "responseNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "9543e843-f5a2-41c2-b42f-ec7fdd7d10e2",
+      "name": "Webhook Reenviar Cita",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1408,
+        128
+      ],
+      "webhookId": "reenviarCitaWebhook1234"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Soportar tanto body plano como body dentro de \"body\"\nconst raw = $json.body ?? $json;\n\nconst errors = [];\n\nif (!raw.cita_id || isNaN(Number(raw.cita_id))) {\n  errors.push('cita_id es obligatorio y debe ser numérico.');\n}\n\nif (raw.nuevo_email && !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(raw.nuevo_email)) {\n  errors.push('nuevo_email no tiene un formato válido.');\n}\n\nif (errors.length) {\n  return [\n    {\n      json: {\n        status: 'error',\n        message: 'Error en los datos para reenviar la cita.',\n        errors,\n      },\n    },\n  ];\n}\n\n// Normalizamos la entrada\nreturn [\n  {\n    json: {\n      cita_id: Number(raw.cita_id),\n      nuevo_email: raw.nuevo_email || null,\n      motivo: raw.motivo || null,\n    },\n  },\n];\n"
+      },
+      "id": "e049b17a-6b1e-454b-9fe4-1753d6db9ea7",
+      "name": "Validar Reenvío",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM citas\nWHERE id = {{$json.cita_id}}\nLIMIT 1;",
+        "additionalFields": {
+          "queryParams": ""
+        }
+      },
+      "id": "cea6bffa-db1d-4825-b018-a4c16c20eed6",
+      "name": "Buscar Cita",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        128
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "U1gk6gNtS2AfXBnb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "JavaScript"
+      },
+      "id": "c2a4000d-064b-4df1-b020-bc513ff08607",
+      "name": "Procesar Cita y Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -736,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json['sendEmail'] }}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      },
+      "id": "2f827dcb-9b9d-405a-952d-7a0026fdaf25",
+      "name": "¿Enviar correo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        128
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "636d708f-86a6-404c-97f1-ba5bfd35743b",
+      "name": "Enviar correo Reenvío",
+      "type": "n8n-nodes-base.sendEmail",
+      "typeVersion": 2,
+      "position": [
+        -1408,
+        -96
+      ],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "language": "JavaScript"
+      },
+      "id": "97ae274c-ef82-45f8-9525-78bd8b561402",
+      "name": "Formatear Respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstEntryJson",
+        "options": {}
+      },
+      "id": "e37758ce-f95a-4365-a089-b9d87b0016fc",
+      "name": "Responder a Webhook Reenvío",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        128
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Reenviar Cita": {
+      "main": [
+        [
+          {
+            "node": "Validar Reenvío",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Reenvío": {
+      "main": [
+        [
+          {
+            "node": "Buscar Cita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Cita": {
+      "main": [
+        [
+          {
+            "node": "Procesar Cita y Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar Cita y Email": {
+      "main": [
+        [
+          {
+            "node": "¿Enviar correo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Enviar correo?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Formatear Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Respuesta": {
+      "main": [
+        [
+          {
+            "node": "Responder a Webhook Reenvío",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "1e00f89f-2c55-4c24-a5f5-7525116065ad",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-28T23:02:31.828Z",
+      "createdAt": "2025-11-28T23:02:31.828Z",
+      "role": "workflow:owner",
+      "workflowId": "ANMvAaRJ5p9BFfSq",
+      "projectId": "WR6tkeQzo7cAVCK0"
+    }
+  ],
+  "tags": []
+}
