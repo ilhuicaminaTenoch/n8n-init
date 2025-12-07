@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2025-12-05T18:42:41.735Z",
+  "updatedAt": "2025-12-07T18:23:32.854Z",
   "createdAt": "2025-11-27T16:44:16.134Z",
   "id": "hJHW9qfckr1UrcWB",
   "name": "Email Tecnico con Cotizacion",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -24,7 +24,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -32,
+        128,
         0
       ],
       "id": "c4f2f298-a63d-4c7e-a745-abd4918a0384",
@@ -56,7 +56,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
       "position": [
-        864,
+        720,
         0
       ],
       "id": "8aa85727-25c7-4e94-aa8d-39022f3222be",
@@ -182,7 +182,7 @@
       }
     ]
   },
-  "versionId": "4da28e19-69d7-4832-9763-b86ddc56e6dd",
+  "versionId": "169e0c0c-db96-48b6-bcbf-9aeb0722b026",
   "triggerCount": 1,
   "shared": [
     {
