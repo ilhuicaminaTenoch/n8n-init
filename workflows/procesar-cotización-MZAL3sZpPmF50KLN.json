@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-07T18:30:02.724Z",
+  "updatedAt": "2025-12-08T22:07:15.307Z",
   "createdAt": "2025-11-27T16:44:00.314Z",
   "id": "MZAL3sZpPmF50KLN",
   "name": "Procesar Cotización",
@@ -333,7 +333,7 @@
         -16
       ],
       "id": "76bfbe2a-c99b-4585-b07c-886ead631241",
-      "name": "HTTP Request"
+      "name": "HTTP Email - Tecnico"
     }
   ],
   "connections": {
@@ -396,14 +396,14 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "HTTP Email - Tecnico",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request": {
+    "HTTP Email - Tecnico": {
       "main": [
         [
           {
@@ -423,7 +423,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "fd018495-f17c-46a0-acb6-7f93d8bf1af3",
+  "versionId": "5b0fe2c2-1299-4b3b-8f29-db70067d9cb8",
   "triggerCount": 1,
   "shared": [
     {
