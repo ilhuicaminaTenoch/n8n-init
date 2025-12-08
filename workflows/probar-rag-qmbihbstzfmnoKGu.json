@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-05T15:00:30.889Z",
+  "updatedAt": "2025-12-08T01:16:58.080Z",
   "createdAt": "2025-12-04T22:55:38.002Z",
   "id": "qmbihbstzfmnoKGu",
   "name": "Probar RAG",
@@ -21,7 +21,7 @@
       "parameters": {
         "mode": "load",
         "tableName": "documents",
-        "prompt": "cámara oculta para interior con micrófono",
+        "prompt": "cámaras Hikvision de 4MP ",
         "topK": 8,
         "options": {
           "columnNames": {
@@ -98,7 +98,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "83bae1c2-442e-4865-97a2-b674dcf97d9f",
+  "versionId": "170ef5c6-1427-480c-8e12-2216fa64be3b",
   "triggerCount": 0,
   "shared": [
     {
